@@ -3,20 +3,34 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
+  Bars3Icon,
   ChevronDownIcon,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import { SolidLogo } from "./SolidLogo";
+import { useSidebar } from "@/app/contexts/SidebarContext";
 
 export function Nav() {
+  const { toggle } = useSidebar();
+
   return (
     <header
-      className="sticky top-0 z-50 w-full border-b bg-cosmos font-sans"
+      className="sticky top-0 z-60 w-full border-b bg-cosmos font-sans"
     >
       <nav
         className="mx-auto flex h-14 max-w-[100vw] items-center justify-between gap-4 px-4 sm:h-16 sm:px-6 lg:px-8"
         aria-label="Main navigation"
       >
+        {/* Mobile sidebar toggle */}
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label="Open sidebar"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white hover:bg-white/10 md:hidden"
+        >
+          <Bars3Icon className="h-6 w-6" aria-hidden />
+        </button>
+
         {/* Logo */}
         <Link
           href="/"

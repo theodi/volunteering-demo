@@ -55,6 +55,7 @@
   --color-foreground: var(--foreground);
   --color-cosmos: #1d293d;
   --color-bold-grey: #666666;
+  --color-tranquil-black: #364153;
 
   /* Fonts */
   --font-sans: var(--font-app);
@@ -63,7 +64,7 @@
 
 body {
   background: white;
-  color: var(--foreground);
+  color: var(--color-tranquil-black);
   font-family: var(--font-sans), sans-serif;
 }
 

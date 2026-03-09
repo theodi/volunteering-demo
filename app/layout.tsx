@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SolidProviders } from "./providers";
-import { Nav } from "./components/Nav";
+import { AppLayout } from "./components/AppLayout";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,8 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <SolidProviders>
-          <Nav />
-          {children}
+          <AppLayout>{children}</AppLayout>
         </SolidProviders>
       </body>
     </html>
