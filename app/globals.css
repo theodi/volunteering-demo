@@ -1,26 +1,120 @@
 @import "tailwindcss";
 
+/* Neue Einstellung – local font from public/font */
+@font-face {
+  font-family: "Neue Einstellung";
+  src: url("/font/NeueEinstellung-Regular.woff2") format("woff2"),
+       url("/font/NeueEinstellung-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Neue Einstellung";
+  src: url("/font/NeueEinstellung-Medium.woff2") format("woff2"),
+       url("/font/NeueEinstellung-Medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Neue Einstellung";
+  src: url("/font/NeueEinstellung-SemiBold.woff2") format("woff2"),
+       url("/font/NeueEinstellung-SemiBold.woff") format("woff");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Neue Einstellung";
+  src: url("/font/NeueEinstellung-Bold.woff2") format("woff2"),
+       url("/font/NeueEinstellung-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand */
+  --primary: #7c4dff;
+  --primary-light: #ede5ff;
+
+  /* Base */
+  --foreground: #121212;
+  --font-app: "Neue Einstellung", ui-sans-serif, system-ui, sans-serif;
+
+ 
 }
 
 @theme inline {
-  --color-background: var(--background);
+  /* Brand */
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+
+  /* Base */
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-cosmos: #1d293d;
+  --color-bold-grey: #666666;
+
+  /* Fonts */
+  --font-sans: var(--font-app);
+  --font-mono: ui-monospace, monospace;
+}
+
+body {
+  background: white;
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+}
+
+/* Slim scrollbar with primary light */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--primary) 50%, transparent) white;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: white;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--primary-light) 80%, var(--primary));
+}
+
+/* Hide scrollbar on mobile */
+@media (max-width: 767px) {
+  * {
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Hide scrollbar for horizontal collection scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #f1f5f9;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    background: #0f172a;
+  }
 }
