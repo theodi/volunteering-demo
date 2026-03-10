@@ -56,6 +56,10 @@
   --color-cosmos: #1d293d;
   --color-bold-grey: #666666;
   --color-tranquil-black: #364153;
+  --color-sparkling-silver: #E2E8F0;
+  --color-white-marble: #E5E7EB;
+  --color-titanium-white: #F3F4F6;
+  --color-hydrocarbon: #4A5565;
 
   /* Fonts */
   --font-sans: var(--font-app);
