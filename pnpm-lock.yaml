@@ -11,6 +11,9 @@ importers:
       '@heroicons/react':
         specifier: ^2.2.0
         version: 2.2.0(react@19.2.3)
+      '@ldo/connected-solid':
+        specifier: ^1.0.0-alpha.36
+        version: 1.0.0-alpha.36
       '@ldo/solid-react':
         specifier: ^1.0.0-alpha.36
         version: 1.0.0-alpha.36
@@ -27,8 +30,8 @@ importers:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
       solid-react-component:
-        specifier: ^0.2.2
-        version: 0.2.2(@ldo/solid-react@1.0.0-alpha.36)(react@19.2.3)
+        specifier: ^0.2.4
+        version: 0.2.4(@ldo/solid-react@1.0.0-alpha.36)(react@19.2.3)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -36,6 +39,9 @@ importers:
       '@types/node':
         specifier: ^20
         version: 20.19.37
+      '@types/qrcode':
+        specifier: ^1.5.6
+        version: 1.5.6
       '@types/react':
         specifier: ^19
         version: 19.2.14
@@ -606,6 +612,9 @@ packages:
 
   '@types/node@20.19.37':
     resolution: {integrity: sha512-8kzdPJ3FsNsVIurqBs7oodNnCEVbni9yUEkaHbgptDACOPW04jimGagZ51E6+lXUwJjgnBw+hyko/lkFWCldqw==}
+
+  '@types/qrcode@1.5.6':
+    resolution: {integrity: sha512-te7NQcV2BOvdj2b1hCAHzAoMNuj65kNBMz0KBaxM6c3VGBOhU0dURQKOtH8CFNI/dsKkwlv32p26qYQTWoB5bw==}
 
   '@types/react-dom@19.2.3':
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
@@ -2001,8 +2010,8 @@ packages:
     resolution: {integrity: sha512-ZX99e6tRweoUXqR+VBrslhda51Nh5MTQwou5tnUDgbtyM0dBgmhEDtWGP/xbKn6hqfPRHujUNwz5fy/wbbhnpw==}
     engines: {node: '>= 0.4'}
 
-  solid-react-component@0.2.2:
-    resolution: {integrity: sha512-fSESVwXKTJAKuPpUt7ZNhgE+pSVpk2seAk2v0TTlgMMYOezp/CYkTnOd7uNEv0lo0g4QzrJjye/8PFnUhS5fLA==}
+  solid-react-component@0.2.4:
+    resolution: {integrity: sha512-aB1wM23SIYq7QfE+5wNQuB+8izB1zhG97U4UHOoXg/KLFpf3hGHSvle4H133qio01cq8cJbnOWHwZXyTyOJ3xA==}
     peerDependencies:
       '@ldo/solid-react': '>=1.0.0-alpha.33'
       react: '>=18.0.0'
@@ -2868,6 +2877,10 @@ snapshots:
   '@types/node@20.19.37':
     dependencies:
       undici-types: 6.21.0
+
+  '@types/qrcode@1.5.6':
+    dependencies:
+      '@types/node': 20.19.37
 
   '@types/react-dom@19.2.3(@types/react@19.2.14)':
     dependencies:
@@ -4474,7 +4487,7 @@ snapshots:
       side-channel-map: 1.0.1
       side-channel-weakmap: 1.0.2
 
-  solid-react-component@0.2.2(@ldo/solid-react@1.0.0-alpha.36)(react@19.2.3):
+  solid-react-component@0.2.4(@ldo/solid-react@1.0.0-alpha.36)(react@19.2.3):
     dependencies:
       '@ldo/solid-react': 1.0.0-alpha.36
       react: 19.2.3

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SolidProviders } from "./providers";
-import { AppLayout } from "./components/AppLayout";
+import { AuthWithReturnUrl } from "./components/AuthWithReturnUrl";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <SolidProviders>
-          <AppLayout>{children}</AppLayout>
+          <AuthWithReturnUrl>{children}</AuthWithReturnUrl>
         </SolidProviders>
       </body>
     </html>
