@@ -1,17 +1,13 @@
+import NVSNavbar from "../components/NVSNavbar";
+
 export default function NationalVolunteerServicesLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-white font-sans">
-      <header className="shrink-0 border-b border-gray-200 bg-white">
-        <div className="mx-auto flex h-14 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-          <h1 className="text-lg font-semibold text-tranquil-black">
-            National Volunteer Services
-          </h1>
-        </div>
-      </header>
+    <div className="flex min-h-screen flex-col bg-white font-sora">
+      <NVSNavbar />
 
       <main className="min-h-0 flex-1">{children}</main>
 

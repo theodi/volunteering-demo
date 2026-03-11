@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap");
 @import "tailwindcss";
 
 /* Neue Einstellung – local font from public/font */
@@ -42,7 +43,7 @@
   /* Base */
   --foreground: #121212;
   --font-app: "Neue Einstellung", ui-sans-serif, system-ui, sans-serif;
-
+  --font-sora: "Sora", sans-serif;
  
 }
 
@@ -60,10 +61,21 @@
   --color-white-marble: #E5E7EB;
   --color-titanium-white: #F3F4F6;
   --color-hydrocarbon: #4A5565;
+  --color-earth-blue: #1D70B8;
+  --color-blue-light: #3F86C3;
 
   /* Fonts */
   --font-sans: var(--font-app);
+  --font-sora: var(--font-sora);
   --font-mono: ui-monospace, monospace;
+}
+
+/* NVS font: Sora with optical sizing and normal style */
+.font-sora {
+  font-family: var(--font-sora);
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 400;
 }
 
 body {
