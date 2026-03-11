@@ -60,10 +60,12 @@
   --color-sparkling-silver: #E2E8F0;
   --color-white-marble: #E5E7EB;
   --color-titanium-white: #F3F4F6;
+  --color-himalayan-white: #F4F8FB;
   --color-hydrocarbon: #4A5565;
   --color-earth-blue: #1D70B8;
   --color-blue-light: #3F86C3;
   --color-blue-custom: #003078;
+  --color-green-deep: #00823B;
 
   /* Fonts */
   --font-sans: var(--font-app);
