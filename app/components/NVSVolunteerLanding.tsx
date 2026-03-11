@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import Button from "./Button";
 import HeroText from "./HeroText";
+import PodAccessPermissionModal from "./PodAccessPermissionModal";
 import StepProgress from "./StepProgress";
 
 const STEPS = [
@@ -19,6 +21,7 @@ const ATTRIBUTE_TAGS = [
 ] as const;
 
 export default function NVSVolunteerLanding() {
+  const [isPodModalOpen, setIsPodModalOpen] = useState(false);
   return (
     <main
       className="max-w-[1320px] w-full mx-auto px-5 py-[30px] sm:px-10 sm:py-[60px] bg-himalayan-white rounded-md"
@@ -59,7 +62,12 @@ export default function NVSVolunteerLanding() {
               ))}
             </div>
             <div className="w-fit mt-6 flex flex-col gap-2.5">
-              <Button fullWidth size="md" className="rounded-none!">
+              <Button
+                fullWidth
+                size="md"
+                className="rounded-none!"
+                onClick={() => setIsPodModalOpen(true)}
+              >
                 Share Pod Data & Get Matched
               </Button>
               <Link
@@ -72,6 +80,11 @@ export default function NVSVolunteerLanding() {
           </div>
         </section>
       </section>
+
+      <PodAccessPermissionModal
+        isOpen={isPodModalOpen}
+        onClose={() => setIsPodModalOpen(false)}
+      />
     </main>
   );
 }

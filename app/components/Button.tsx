@@ -6,7 +6,7 @@ const variantStyles = {
   primary:
     "bg-green-deep text-white font-bold shadow-sm border-b-3 border-b-black hover:bg-green-deep/90",
   secondary:
-    "bg-white text-slate-300 font-normal border-2 border-slate-300 hover:bg-slate-50 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2",
+    "bg-white text-slate-300 font-normal border-2 border-slate-300 hover:text-slate-400 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2",
 } as const;
 
 const sizeStyles = {
