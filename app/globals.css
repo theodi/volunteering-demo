@@ -130,6 +130,35 @@ body {
   display: none;
 }
 
+/* Modal enter animation (CSS-only) */
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-backdrop {
+  animation: modal-backdrop-in 0.2s ease-out forwards;
+}
+
+.modal-panel {
+  animation: modal-panel-in 0.25s ease-out forwards;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground: #f1f5f9;

@@ -1,16 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Button from "./Button";
-import HeroText from "./HeroText";
+import Button from "../Button";
+import HeroText from "../HeroText";
+import TagList from "../TagList";
 import PodAccessPermissionModal from "./PodAccessPermissionModal";
-import StepProgress from "./StepProgress";
+import EmergencyContactPermissionModal from "./EmergencyContactPermissionModal";
+import StepProgress from "../StepProgress";
 
 const STEPS = [
-  { id: 1, label: "Share Pod", active: true },
-  { id: 2, label: "Confirm", active: false },
-  { id: 3, label: "View Matches", active: false },
+  { id: 1, label: "Share Pod" },
+  { id: 2, label: "Confirm" },
+  { id: 3, label: "View Matches" },
 ] as const;
 
 const ATTRIBUTE_TAGS = [
@@ -21,7 +24,17 @@ const ATTRIBUTE_TAGS = [
 ] as const;
 
 export default function NVSVolunteerLanding() {
+  const router = useRouter();
   const [isPodModalOpen, setIsPodModalOpen] = useState(false);
+  const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+
+  const handleCompleteToOpportunities = () => {
+    setCurrentStep(3);
+    setIsEmergencyModalOpen(false);
+    router.push("/national-volunteer-services/opportunities");
+  };
+
   return (
     <main
       className="max-w-[1320px] w-full mx-auto px-5 py-[30px] sm:px-10 sm:py-[60px] bg-himalayan-white rounded-md"
@@ -39,7 +52,7 @@ export default function NVSVolunteerLanding() {
 
         {/* Right: Progress + Card */}
         <section className="w-full flex flex-col gap-5 sm:gap-18">
-          <StepProgress steps={STEPS} />
+          <StepProgress steps={STEPS} currentStep={currentStep} />
 
           {/* Card */}
           <div className="rounded-2xl border border-earth-blue bg-white p-5 sm:p-10 shadow-lg">
@@ -51,16 +64,11 @@ export default function NVSVolunteerLanding() {
               descriptionClassName="!mt-3 !text-sm !leading-relaxed !text-tranquil-black"
             />
 
-            <div className="mt-5 flex flex-wrap gap-3.5">
-              {ATTRIBUTE_TAGS.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded border border-blue-custom bg-blue-50 px-2.5 py-1.5 text-xs font-semibold text-blue-custom"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+            <TagList
+              items={ATTRIBUTE_TAGS}
+              className="mt-5 gap-3.5"
+              itemClassName="rounded border border-blue-custom bg-blue-50 px-2.5 py-1.5 text-xs font-semibold text-blue-custom"
+            />
             <div className="w-fit mt-6 flex flex-col gap-2.5">
               <Button
                 fullWidth
@@ -84,6 +92,16 @@ export default function NVSVolunteerLanding() {
       <PodAccessPermissionModal
         isOpen={isPodModalOpen}
         onClose={() => setIsPodModalOpen(false)}
+        onAllow={() => {
+          setCurrentStep(2);
+          setIsEmergencyModalOpen(true);
+        }}
+      />
+      <EmergencyContactPermissionModal
+        isOpen={isEmergencyModalOpen}
+        onClose={() => setIsEmergencyModalOpen(false)}
+        onOptIn={handleCompleteToOpportunities}
+        onSearchOnly={handleCompleteToOpportunities}
       />
     </main>
   );

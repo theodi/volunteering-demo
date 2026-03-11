@@ -1,4 +1,4 @@
-import NVSVolunteerLanding from "../components/NVSVolunteerLanding";
+import NVSVolunteerLanding from "../components/nvs/NVSVolunteerLanding";
 
 export default function NationalVolunteerServicesPage() {
   return (

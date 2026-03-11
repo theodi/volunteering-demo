@@ -41,16 +41,14 @@ export default function ModalWrapper({
       role="dialog"
       aria-modal="true"
     >
-      {/* Backdrop */}
       <button
         type="button"
         onClick={onClose}
-        className="absolute inset-0 bg-black/50"
+        className="modal-backdrop absolute inset-0 bg-black/50"
         aria-label="Close modal"
       />
-      {/* Modal panel */}
       <div
-        className={`relative w-full max-w-full rounded-2xl border border-blue-custom bg-white shadow-xl sm:max-w-lg ${className}`.trim()}
+        className={`modal-panel relative w-full max-w-full rounded-2xl border border-blue-custom bg-white shadow-xl sm:max-w-lg ${className}`.trim()}
         onClick={(e) => e.stopPropagation()}
       >
         {children}

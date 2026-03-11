@@ -1,8 +1,9 @@
 "use client";
 
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
-import Button from "./Button";
-import ModalWrapper from "./ModalWrapper";
+import Button from "../Button";
+import ModalWrapper from "../ModalWrapper";
+import HeroText from "../HeroText";
 
 const PERMISSIONS = [
   {
@@ -51,16 +52,16 @@ export default function PodAccessPermissionModal({
     <ModalWrapper isOpen={isOpen} onClose={onClose} className="max-w-[580px]! w-full p-5 sm:p-10">
       <main className="w-full flex flex-col gap-10">
         <section className="w-full flex flex-col gap-5">
-          <div className="w-full flex flex-col gap-1.5">
-            <h2 className="text-xl font-bold text-blue-custom sm:text-2xl">
-              We'd like to access your Pod data
-            </h2>
-            <p className="text-sm leading-relaxed text-gray-700">
-              National Volunteer Services is requesting permission to read the
+
+          <HeroText
+            title="We'd like to access your Pod data"
+            description="National Volunteer Services is requesting permission to read the
               following data from your Solid Pod to find you relevant volunteering
-              opportunities.
-            </p>
-          </div>
+              opportunities."
+            titleClassName="text-xl !font-bold !text-blue-custom sm:!text-2xl"
+            descriptionClassName="!mt-1.5 !text-sm !leading-relaxed !gray-700"
+          />
+
 
           <div className="w-full rounded-xl bg-himalayan-white p-4 sm:p-5">
             <ul className="space-y-3.5">
