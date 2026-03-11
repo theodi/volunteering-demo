@@ -8,10 +8,6 @@ interface NVSNavbarProps {
   userInitials?: string;
 }
 
-const GOVUK_BLUE = "#005ea5";
-const GOVUK_BLUE_DARK = "#004b8d";
-const GOVUK_GREY = "#425563";
-
 export default function NVSNavbar({
   userName = "Alex Morgan",
   userInitials = "AM",

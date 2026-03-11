@@ -63,6 +63,7 @@
   --color-hydrocarbon: #4A5565;
   --color-earth-blue: #1D70B8;
   --color-blue-light: #3F86C3;
+  --color-blue-custom: #003078;
 
   /* Fonts */
   --font-sans: var(--font-app);
