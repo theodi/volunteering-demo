@@ -1,6 +1,8 @@
 import { Card } from "./Card";
 import { SectionTitle } from "./Card";
 import { ProfileEntry } from "./ProfileEntry";
+import { EmptyState } from "./EmptyState";
+import { AcademicCapIcon } from "@heroicons/react/24/outline";
 
 export type EducationItem = {
   schoolInitial: string;
@@ -11,50 +13,31 @@ export type EducationItem = {
   date: string;
 };
 
-const educationData: EducationItem[] = [
-  {
-    schoolInitial: "M",
-    schoolName: "Middle Earth Technic University",
-    employmentType: "Fulltime",
-    degree: "Master degree in Computer science and Mathermaties",
-    location: "Istanbul, Turkey",
-    date: "January 2025",
-  },
-  {
-    schoolInitial: "B",
-    schoolName: "Bogazici Techic University",
-    employmentType: "Fulltime",
-    degree: "Master degree in Computer science and Mathermaties",
-    location: "Istanbul, Turkey",
-    date: "January 2018",
-  },
-  {
-    schoolInitial: "B",
-    schoolName: "Bogazici Techic University",
-    employmentType: "Fulltime",
-    degree: "Master degree in Computer science and Mathermaties",
-    location: "Istanbul, Turkey",
-    date: "January 2013",
-  },
-];
-
-export function EducationSection({ items }: { items?: EducationItem[] }) {
-  const data = items ?? educationData;
+export function EducationSection({ items = [] }: { items?: EducationItem[] }) {
   return (
     <Card>
       <SectionTitle>Education</SectionTitle>
       <div className="space-y-5">
-        {data.map((entry, i) => (
-          <ProfileEntry
-            key={i}
-            initial={entry.schoolInitial}
-            title={entry.schoolName}
-            badge={entry.employmentType}
-            rightLabel={entry.date}
-            subtitlePrimary={entry.degree}
-            subtitleSecondary={entry.location}
+        {items.length > 0 ? (
+          items.map((entry, i) => (
+            <ProfileEntry
+              key={i}
+              initial={entry.schoolInitial}
+              title={entry.schoolName}
+              badge={entry.employmentType}
+              rightLabel={entry.date}
+              subtitlePrimary={entry.degree}
+              subtitleSecondary={entry.location}
+            />
+          ))
+        ) : (
+          <EmptyState
+            title="No education yet"
+            description="Add your schools and qualifications."
+            icon={<AcademicCapIcon className="h-5 w-5" />}
+            className="border-none"
           />
-        ))}
+        )}
       </div>
     </Card>
   );

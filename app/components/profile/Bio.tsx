@@ -1,22 +1,35 @@
 import { Card } from "./Card";
 import { SectionTitle } from "./Card";
 import { ExpandableText } from "./ExpandableText";
+import { EmptyState } from "./EmptyState";
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
 
-const fullBio =
-  "Experienced instrumentation specialist with a strong background in aerospace missions and field testing. Contributed to advanced space research projects including Mars mission support and flight operations. Passionate about precision engineering, innovation and driving results in demanding environments.";
+const TRUNCATE_LEN = 180;
 
-const truncatedBio =
-  "Experienced instrumentation specialist with a strong background in aerospace missions and field testing. Contributed to advanced space research projects including Mars mission support and flight operations. Passionate about precision engineering, innovation";
+export function Bio({ bio }: { bio?: string | null }) {
+  const text = bio?.trim() || "";
+  const hasBio = text.length > 0;
+  const full = text;
+  const truncated =
+    text.length <= TRUNCATE_LEN ? text : `${text.slice(0, TRUNCATE_LEN)}...`;
 
-export function Bio() {
   return (
     <Card>
       <SectionTitle>Bio</SectionTitle>
-      <ExpandableText
-        truncated={`${truncatedBio}...`}
-        full={fullBio}
-        className="text-sm leading-relaxed text-tranquil-black"
-      />
+      {hasBio ? (
+        <ExpandableText
+          truncated={truncated}
+          full={full}
+          className="text-sm leading-relaxed text-tranquil-black"
+        />
+      ) : (
+        <EmptyState
+          title="No bio yet"
+          description="Add a short bio to introduce yourself."
+          icon={<DocumentTextIcon className="h-5 w-5" />}
+          className="border-none"
+        />
+      )}
     </Card>
   );
 }

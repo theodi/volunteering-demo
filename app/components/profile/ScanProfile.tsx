@@ -7,16 +7,16 @@ import { SectionTitle } from "./Card";
 
 const QR_SIZE = 128;
 
-export function ScanProfile() {
+export function ScanProfile({ webId }: { webId?: string | null }) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const url =
-      typeof window !== "undefined"
-        ? window.location.href
-        : "https://example.com/profile";
-    QRCode.toDataURL(url, { width: QR_SIZE, margin: 1 }).then(setDataUrl);
-  }, []);
+    if (!webId?.trim()) {
+      setDataUrl(null);
+      return;
+    }
+    QRCode.toDataURL(webId.trim(), { width: QR_SIZE, margin: 1 }).then(setDataUrl);
+  }, [webId]);
 
   return (
     <Card>

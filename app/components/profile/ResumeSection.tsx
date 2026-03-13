@@ -1,8 +1,10 @@
 import { Card } from "./Card";
 import { SectionTitle } from "./Card";
 import { ProfileEntry } from "./ProfileEntry";
+import { EmptyState } from "./EmptyState";
+import { BriefcaseIcon } from "@heroicons/react/24/outline";
 
-const resumeData: Array<{
+export type ResumeItem = {
   companyInitial: string;
   companyName: string;
   logoUrl?: string;
@@ -10,67 +12,38 @@ const resumeData: Array<{
   employmentType: string;
   location: string;
   period: string;
-  description: string;
-  descriptionFull: string;
-}> = [
-  {
-    companyInitial: "G",
-    companyName: "Google",
-    logoUrl: "/google-logo.jpg",
-    jobTitle: "Front-End Developer",
-    employmentType: "Fulltime",
-    location: "Istanbul, Turkey",
-    period: "Oct, 2025 to Present",
-    description:
-      "Experienced instrumentation specialist with a strong background in aerospace missions and field testing. Contributed to advanced space research projects including Mars mission support...",
-    descriptionFull:
-      "Experienced instrumentation specialist with a strong background in aerospace missions and field testing. Contributed to advanced space research projects including Mars mission support and flight operations. Passionate about precision engineering, innovation and driving results in demanding environments.",
-  },
-  {
-    companyInitial: "M",
-    companyName: "Microsoft",
-    jobTitle: "Front-End Developer",
-    employmentType: "Fulltime",
-    location: "Istanbul, Turkey",
-    period: "Oct, 2025 to Present",
-    description:
-      "Experienced instrumentation specialist with a strong background in aerospace missions and field testing. Contributed to advanced space research projects including Mars mission support...",
-    descriptionFull:
-      "Experienced instrumentation specialist with a strong background in aerospace missions and field testing. Contributed to advanced space research projects including Mars mission support and flight operations. Passionate about precision engineering, innovation and driving results in demanding environments.",
-  },
-  {
-    companyInitial: "A",
-    companyName: "Amazon",
-    jobTitle: "Front-End Developer",
-    employmentType: "Fulltime",
-    location: "Istanbul, Turkey",
-    period: "Oct, 2025 to Present",
-    description:
-      "Experienced instrumentation specialist with a strong background in aerospace missions and field testing. Contributed to advanced space research projects including Mars mission support...",
-    descriptionFull:
-      "Experienced instrumentation specialist with a strong background in aerospace missions and field testing. Contributed to advanced space research projects including Mars mission support and flight operations. Passionate about precision engineering, innovation and driving results in demanding environments.",
-  },
-];
+  description?: string;
+  descriptionFull?: string;
+};
 
-export function ResumeSection() {
+export function ResumeSection({ items = [] }: { items?: ResumeItem[] }) {
   return (
     <Card>
       <SectionTitle>Resume</SectionTitle>
       <div className="space-y-5">
-        {resumeData.map((entry, i) => (
-          <ProfileEntry
-            key={i}
-            initial={entry.companyInitial}
-            logoUrl={entry.logoUrl}
-            title={entry.jobTitle}
-            badge={entry.employmentType}
-            rightLabel={entry.period}
-            subtitlePrimary={entry.companyName}
-            subtitleSecondary={entry.location}
-            description={entry.description}
-            descriptionFull={entry.descriptionFull}
+        {items.length > 0 ? (
+          items.map((entry, i) => (
+            <ProfileEntry
+              key={i}
+              initial={entry.companyInitial}
+              logoUrl={entry.logoUrl}
+              title={entry.jobTitle}
+              badge={entry.employmentType}
+              rightLabel={entry.period}
+              subtitlePrimary={entry.companyName}
+              subtitleSecondary={entry.location}
+              description={entry.description}
+              descriptionFull={entry.descriptionFull}
+            />
+          ))
+        ) : (
+          <EmptyState
+            title="No experience yet"
+            description="Add your work history and roles."
+            icon={<BriefcaseIcon className="h-5 w-5" />}
+            className="border-none"
           />
-        ))}
+        )}
       </div>
     </Card>
   );

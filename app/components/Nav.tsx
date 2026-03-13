@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import {
   Bars3Icon,
   ChevronDownIcon,
@@ -9,9 +8,14 @@ import {
 } from "@heroicons/react/24/outline";
 import { SolidLogo } from "./SolidLogo";
 import { useSidebar } from "@/app/contexts/SidebarContext";
+import { useUserProfile } from "@/app/lib/hooks/useUserProfile";
 
 export function Nav() {
   const { toggle } = useSidebar();
+  const { profile } = useUserProfile();
+  const photoUrl = profile?.photoUrl?.trim() || null;
+  const name = profile?.name?.trim();
+  const initial = name && name.length > 0 ? name.charAt(0).toUpperCase() : "?";
 
   return (
     <header
@@ -59,13 +63,18 @@ export function Nav() {
             aria-label="User menu"
           >
             <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-white sm:h-9 sm:w-9">
-              <Image
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face"
-                alt=""
-                width={36}
-                height={36}
-                className="h-full w-full object-cover"
-              />
+              {photoUrl ? (
+                <img
+                  src={photoUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center bg-bold-grey text-sm font-semibold text-white sm:text-base">
+                  {initial}
+                </span>
+              )}
             </span>
             <ChevronDownIcon className="h-5 w-5 shrink-0" aria-hidden />
           </button>
