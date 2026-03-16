@@ -31,20 +31,21 @@ export default function HeroText({
   titleClassName = "",
   descriptionClassName = "",
 }: HeroTextProps) {
+  const useInlineTitleColor = !titleClassName;
+  const titleColorStyle = useInlineTitleColor ? { color: defaultTitleColor } : undefined;
+
   const renderTitle = () => {
     if (!highlightedText || !title.includes(highlightedText)) {
-      return (
-        <span style={{ color: defaultTitleColor }}>{title}</span>
-      );
+      return <span style={titleColorStyle}>{title}</span>;
     }
     const i = title.indexOf(highlightedText);
     const before = title.slice(0, i);
     const after = title.slice(i + highlightedText.length);
     return (
       <>
-        <span style={{ color: defaultTitleColor }}>{before}</span>
+        <span style={titleColorStyle}>{before}</span>
         <span style={{ color: highlightedColor }}>{highlightedText}</span>
-        <span style={{ color: defaultTitleColor }}>{after}</span>
+        <span style={titleColorStyle}>{after}</span>
       </>
     );
   };

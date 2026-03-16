@@ -1,0 +1,131 @@
+# Volunteer Profile Ontology – Cause categories and causes
+# Aligned with Volunteering Data Model and volunteer-profile-manager
+# https://github.com/theodi/volunteer-profile-manager/blob/main/src/ontology/volunteer.ttl
+#
+# Namespaces
+@prefix vp:   <https://id.volunteeringdata.io/volunteer-profile/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix dc:   <http://purl.org/dc/terms/> .
+
+# Cause categories (top-level) and causes (narrower concepts)
+# Categories
+vp:Health a skos:Concept ;
+    skos:prefLabel "Health"@en .
+
+vp:Education a skos:Concept ;
+    skos:prefLabel "Education"@en .
+
+vp:Environment a skos:Concept ;
+    skos:prefLabel "Environment"@en .
+
+vp:Community a skos:Concept ;
+    skos:prefLabel "Community"@en .
+
+vp:ArtsAndRecreation a skos:Concept ;
+    skos:prefLabel "Arts & Recreation"@en .
+
+vp:Emergency a skos:Concept ;
+    skos:prefLabel "Emergency"@en .
+
+vp:AnimalWelfare a skos:Concept ;
+    skos:prefLabel "Animal Welfare"@en .
+
+vp:International a skos:Concept ;
+    skos:prefLabel "International"@en .
+
+# Health causes
+vp:MentalHealth a skos:Concept ;
+    skos:prefLabel "Mental Health"@en ;
+    skos:broader vp:Health .
+vp:PhysicalHealth a skos:Concept ;
+    skos:prefLabel "Physical Health"@en ;
+    skos:broader vp:Health .
+vp:DisabilitySupport a skos:Concept ;
+    skos:prefLabel "Disability Support"@en ;
+    skos:broader vp:Health .
+vp:ElderCare a skos:Concept ;
+    skos:prefLabel "Elder Care"@en ;
+    skos:broader vp:Health .
+
+# Education causes
+vp:EducationCause a skos:Concept ;
+    skos:prefLabel "Education"@en ;
+    skos:broader vp:Education .
+vp:YouthDevelopment a skos:Concept ;
+    skos:prefLabel "Youth Development"@en ;
+    skos:broader vp:Education .
+vp:Mentoring a skos:Concept ;
+    skos:prefLabel "Mentoring"@en ;
+    skos:broader vp:Education .
+vp:Literacy a skos:Concept ;
+    skos:prefLabel "Literacy"@en ;
+    skos:broader vp:Education .
+
+# Environment causes
+vp:EnvironmentalConservation a skos:Concept ;
+    skos:prefLabel "Environmental Conservation"@en ;
+    skos:broader vp:Environment .
+vp:ClimateAction a skos:Concept ;
+    skos:prefLabel "Climate Action"@en ;
+    skos:broader vp:Environment .
+vp:WildlifeProtection a skos:Concept ;
+    skos:prefLabel "Wildlife Protection"@en ;
+    skos:broader vp:Environment .
+vp:SustainableLiving a skos:Concept ;
+    skos:prefLabel "Sustainable Living"@en ;
+    skos:broader vp:Environment .
+
+# Community causes
+vp:Homelessness a skos:Concept ;
+    skos:prefLabel "Homelessness"@en ;
+    skos:broader vp:Community .
+vp:FoodSecurity a skos:Concept ;
+    skos:prefLabel "Food Security"@en ;
+    skos:broader vp:Community .
+vp:CommunityDevelopment a skos:Concept ;
+    skos:prefLabel "Community Development"@en ;
+    skos:broader vp:Community .
+vp:SocialInclusion a skos:Concept ;
+    skos:prefLabel "Social Inclusion"@en ;
+    skos:broader vp:Community .
+vp:RefugeeSupport a skos:Concept ;
+    skos:prefLabel "Refugee Support"@en ;
+    skos:broader vp:Community .
+
+# Arts & Recreation causes
+vp:ArtsAndCulture a skos:Concept ;
+    skos:prefLabel "Arts and Culture"@en ;
+    skos:broader vp:ArtsAndRecreation .
+vp:HeritagePreservation a skos:Concept ;
+    skos:prefLabel "Heritage Preservation"@en ;
+    skos:broader vp:ArtsAndRecreation .
+vp:Sports a skos:Concept ;
+    skos:prefLabel "Sports"@en ;
+    skos:broader vp:ArtsAndRecreation .
+
+# Emergency causes
+vp:DisasterRelief a skos:Concept ;
+    skos:prefLabel "Disaster Relief"@en ;
+    skos:broader vp:Emergency .
+vp:EmergencyResponse a skos:Concept ;
+    skos:prefLabel "Emergency Response"@en ;
+    skos:broader vp:Emergency .
+
+# Animal Welfare causes
+vp:AnimalWelfareCause a skos:Concept ;
+    skos:prefLabel "Animal Welfare"@en ;
+    skos:broader vp:AnimalWelfare .
+vp:AnimalRescue a skos:Concept ;
+    skos:prefLabel "Animal Rescue"@en ;
+    skos:broader vp:AnimalWelfare .
+
+# International causes
+vp:InternationalDevelopment a skos:Concept ;
+    skos:prefLabel "International Development"@en ;
+    skos:broader vp:International .
+vp:HumanRights a skos:Concept ;
+    skos:prefLabel "Human Rights"@en ;
+    skos:broader vp:International .

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type ReactNode } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 export interface DropdownOption {
@@ -97,6 +97,75 @@ export default function Dropdown({
             );
           })}
         </ul>
+      )}
+    </div>
+  );
+}
+
+// Generic action menu for icon-triggered dropdowns (e.g. \"...\" menus)
+export interface ActionMenuItem {
+  id: string;
+  label: string;
+  onClick: () => void;
+  destructive?: boolean;
+}
+
+export interface ActionMenuProps {
+  trigger: ReactNode;
+  items: ActionMenuItem[];
+  align?: "left" | "right";
+}
+
+export function ActionMenu({ trigger, items, align = "right" }: ActionMenuProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [open]);
+
+  const panelAlign = align === "left" ? "left-0" : "right-0";
+
+  return (
+    <div className="relative" ref={ref}>
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((prev) => !prev);
+        }}
+      >
+        {trigger}
+      </div>
+      {open && (
+        <div
+          className={`absolute ${panelAlign} top-8 z-50 w-32 rounded-md border border-slate-100 bg-white py-1 text-sm shadow-lg`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {items.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`block w-full px-3 py-1.5 text-left cursor-pointer ${
+                item.destructive
+                  ? "text-red-600 hover:bg-red-50"
+                  : "text-slate-700 hover:bg-slate-50"
+              }`}
+              onClick={() => {
+                setOpen(false);
+                item.onClick();
+              }}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );
