@@ -69,6 +69,8 @@
   --color-lavender: #E4DBFE;
   --color-light-lavender: #FAF5FF;
   --color-rose-lilac: #E9D4FF;
+  --color-mystic-white: #F6EDFF;
+  --color-blue-grey: #D1D5DC;
 
   /* Fonts */
   --font-sans: var(--font-app);

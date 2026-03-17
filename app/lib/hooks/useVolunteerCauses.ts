@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getVolunteerCauses, type VolunteerCauses } from "@/app/lib/volunteerOntology";
+import type { VolunteerCauses } from "@/app/lib/volunteerOntology";
+import { useVolunteerOntology } from "@/app/contexts/VolunteerOntologyContext";
 
 export type UseVolunteerCausesResult = {
   categories: VolunteerCauses["categories"];
@@ -11,24 +11,15 @@ export type UseVolunteerCausesResult = {
 };
 
 /**
- * Loads cause categories and cause labels from the volunteer ontology (public/ontology/volunteer.ttl).
+ * Cause categories and labels from the volunteer ontology.
+ * Requires VolunteerOntologyProvider (data is loaded on the server).
  */
 export function useVolunteerCauses(): UseVolunteerCausesResult {
-  const [data, setData] = useState<VolunteerCauses | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    getVolunteerCauses()
-      .then(setData)
-      .catch((err) => setError(err instanceof Error ? err : new Error(String(err))))
-      .finally(() => setIsLoading(false));
-  }, []);
-
+  const { causes } = useVolunteerOntology();
   return {
-    categories: data?.categories ?? {},
-    allCauseLabels: data?.allCauseLabels ?? [],
-    isLoading,
-    error,
+    categories: causes.categories,
+    allCauseLabels: causes.allCauseLabels,
+    isLoading: false,
+    error: null,
   };
 }

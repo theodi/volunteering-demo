@@ -110,7 +110,7 @@ export function LocationMapView({
 function ZoomControl() {
   const map = useMap();
   return (
-    <div className="absolute left-2 top-2 z-1000 flex flex-col gap-0.5 rounded border border-sparkling-silver bg-white p-0.5 shadow-sm">
+    <div className="absolute left-2 top-2 z-40 flex flex-col gap-0.5 rounded border border-sparkling-silver bg-white p-0.5 shadow-sm">
       <button
         type="button"
         aria-label="Zoom in"

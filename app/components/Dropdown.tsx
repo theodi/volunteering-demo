@@ -13,6 +13,8 @@ export interface DropdownProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  /** Trigger and container take full width of parent */
+  fullWidth?: boolean;
   /** Class for the trigger button */
   triggerClassName?: string;
   /** Class for the dropdown panel */
@@ -24,6 +26,7 @@ export default function Dropdown({
   value,
   onChange,
   placeholder = "Select…",
+  fullWidth = false,
   triggerClassName = "",
   panelClassName = "",
 }: DropdownProps) {
@@ -50,7 +53,10 @@ export default function Dropdown({
   };
 
   return (
-    <div className="relative inline-block" ref={containerRef}>
+    <div
+      className={fullWidth ? "relative block w-full" : "relative inline-block"}
+      ref={containerRef}
+    >
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
@@ -58,7 +64,7 @@ export default function Dropdown({
         aria-expanded={isOpen}
         aria-labelledby="dropdown-label"
         id="dropdown-trigger"
-        className={`inline-flex items-center justify-between gap-2 border border-gray-300 bg-white p-2.5 text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-custom focus:ring-offset-2 cursor-pointer ${triggerClassName}`.trim()}
+        className={`inline-flex items-center justify-between gap-2 border border-gray-300 bg-white p-2.5 text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-custom focus:ring-offset-2 cursor-pointer ${fullWidth ? "w-full" : ""} ${triggerClassName}`.trim()}
       >
         <span>{displayLabel}</span>
         <ChevronDownIcon
@@ -85,9 +91,9 @@ export default function Dropdown({
                 <button
                   type="button"
                   onClick={() => handleSelect(option.value)}
-                  className={`w-full px-3 py-2 text-left text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-custom focus:ring-inset cursor-pointer ${
+                  className={`w-full px-3 py-2 text-left text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset cursor-pointer ${
                     isSelected
-                      ? "bg-earth-blue text-white"
+                      ? "bg-primary-light text-primary"
                       : "bg-white text-gray-700 hover:bg-gray-50"
                   }`}
                 >

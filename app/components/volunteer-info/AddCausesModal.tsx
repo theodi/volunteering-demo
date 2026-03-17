@@ -1,13 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  HeartIcon,
-  XMarkIcon,
-  MagnifyingGlassIcon,
-  PlusIcon,
-} from "@heroicons/react/24/outline";
+import { HeartIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import ModalWrapper from "../ModalWrapper";
+import { ModalHeader } from "../ModalHeader";
 import { CheckIconCustom } from "../svg/CheckIconCustom";
 import { useVolunteerCauses } from "@/app/lib/hooks/useVolunteerCauses";
 
@@ -57,23 +53,7 @@ export function AddCausesModal({
   return (
     <ModalWrapper isOpen={isOpen} onClose={handleClose} className="max-w-xl! w-full border-none! rounded-sm!">
       <section className="w-full flex flex-col min-h-[55vh] max-h-[55vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-6 w-6 items-center justify-center text-primary">
-              <HeartIcon className="h-6 w-6" />
-            </span>
-            <h2 className="text-lg font-semibold text-gray-900">Add Causes</h2>
-          </div>
-          <button
-            type="button"
-            onClick={handleClose}
-            aria-label="Close"
-            className="rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          >
-            <XMarkIcon className="h-5 w-5" />
-          </button>
-        </div>
+        <ModalHeader title="Add Causes" onClose={handleClose} icon={<HeartIcon className="h-6 w-6" />} />
 
         {/* Search */}
         <div className="px-5 pt-3">
