@@ -15,6 +15,7 @@ const SKOS = {
 
 const BASE_IRI = "https://id.volunteeringdata.io/volunteer-profile/";
 const EQUIPMENT_SCHEME_IRI = `${BASE_IRI}EquipmentRequirements`;
+const SKILLS_SCHEME_IRI = `${BASE_IRI}SkillsScheme`;
 
 // —— Causes ——
 
@@ -32,6 +33,15 @@ export type EquipmentCategories = Record<string, string[]>;
 export type VolunteerEquipment = {
   categories: EquipmentCategories;
   allEquipmentLabels: string[];
+};
+
+// —— Skills ——
+
+export type SkillCategories = Record<string, string[]>;
+
+export type VolunteerSkills = {
+  categories: SkillCategories;
+  allSkillLabels: string[];
 };
 
 // —— Shared SKOS helpers ——
@@ -75,12 +85,13 @@ function parseTurtle(turtleText: string): { store: Store; dataset: VolunteerOnto
   return { store, dataset };
 }
 
-/** Category labels for equipment/requirements from the ConceptScheme (vp:EquipmentRequirements). */
-function getEquipmentCategoryLabelsFromScheme(
+/** Category labels from a ConceptScheme (hasTopConcept). */
+function getCategoryLabelsFromScheme(
   store: Store,
-  dataset: VolunteerOntologyDataset
+  dataset: VolunteerOntologyDataset,
+  schemeIri: string
 ): string[] {
-  const scheme = DataFactory.namedNode(EQUIPMENT_SCHEME_IRI);
+  const scheme = DataFactory.namedNode(schemeIri);
   const hasTopConcept = DataFactory.namedNode(SKOS.hasTopConcept);
   const quads = store.getQuads(scheme, hasTopConcept, null, null);
   const order: string[] = [];
@@ -127,7 +138,7 @@ export function parseVolunteerTtl(turtleText: string): VolunteerCauses {
  */
 export function parseVolunteerEquipmentTtl(turtleText: string): VolunteerEquipment {
   const { store, dataset } = parseTurtle(turtleText);
-  const categoryOrder = getEquipmentCategoryLabelsFromScheme(store, dataset);
+  const categoryOrder = getCategoryLabelsFromScheme(store, dataset, EQUIPMENT_SCHEME_IRI);
   const equipmentCategoryLabels = new Set(categoryOrder);
 
   const categories: EquipmentCategories = {};
@@ -143,4 +154,28 @@ export function parseVolunteerEquipmentTtl(turtleText: string): VolunteerEquipme
 
   const allEquipmentLabels = categoryOrder.flatMap((cat) => categories[cat] ?? []);
   return { categories, allEquipmentLabels };
+}
+
+/**
+ * Parses Turtle and returns skill categories and labels.
+ * Only includes concepts whose category is in the vp:SkillsScheme scheme.
+ */
+export function parseVolunteerSkillsTtl(turtleText: string): VolunteerSkills {
+  const { store, dataset } = parseTurtle(turtleText);
+  const categoryOrder = getCategoryLabelsFromScheme(store, dataset, SKILLS_SCHEME_IRI);
+  const skillCategoryLabels = new Set(categoryOrder);
+
+  const categories: SkillCategories = {};
+  for (const cat of categoryOrder) categories[cat] = [];
+
+  for (const concept of dataset.conceptsWithBroader) {
+    const label = concept.label;
+    const catLabel = concept.categoryLabel;
+    if (!label || !catLabel) continue;
+    if (!skillCategoryLabels.has(catLabel)) continue;
+    categories[catLabel].push(label);
+  }
+
+  const allSkillLabels = categoryOrder.flatMap((cat) => categories[cat] ?? []);
+  return { categories, allSkillLabels };
 }

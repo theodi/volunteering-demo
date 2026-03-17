@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import ModalWrapper from "../ModalWrapper";
 import { ModalHeader } from "../ModalHeader";
+import { ModalSearchInput } from "../ModalSearchInput";
 import Button from "../Button";
 import { CheckIconCustom } from "../svg/CheckIconCustom";
 import { EquipmentIcon } from "../svg/EquipmentIcon";
@@ -86,20 +87,13 @@ export function AddEquipmentModal({
       <section className="w-full flex flex-col min-h-[55vh] max-h-[55vh]">
         <ModalHeader title="Equipment Inventory" onClose={handleClose} icon={<VanIcon className="h-6 w-6" />} />
 
-        {/* Search */}
-        <div className="border-b border-slate-100 px-5 py-3">
-          <div className="flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2">
-            <MagnifyingGlassIcon className="h-5 w-5 shrink-0 text-gray-400" />
-            <input
-              type="search"
-              placeholder="Search Equipment Inventory"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="min-w-0 flex-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
-              aria-label="Search equipment inventory"
-            />
-          </div>
-        </div>
+        <ModalSearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search Equipment Inventory"
+          ariaLabel="Search equipment inventory"
+          className="border-b border-slate-100 px-5 py-3"
+        />
 
         {/* Equipment list - scrollable */}
         <div className="overflow-y-auto px-5 py-4">

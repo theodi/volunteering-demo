@@ -8,13 +8,16 @@ import { join } from "path";
 import {
   parseVolunteerTtl,
   parseVolunteerEquipmentTtl,
+  parseVolunteerSkillsTtl,
   type VolunteerCauses,
   type VolunteerEquipment,
+  type VolunteerSkills,
 } from "@/app/lib/volunteerOntology";
 
 export type VolunteerOntologyData = {
   causes: VolunteerCauses;
   equipment: VolunteerEquipment;
+  skills: VolunteerSkills;
 };
 
 export function loadVolunteerOntology(): VolunteerOntologyData {
@@ -23,5 +26,6 @@ export function loadVolunteerOntology(): VolunteerOntologyData {
   return {
     causes: parseVolunteerTtl(text),
     equipment: parseVolunteerEquipmentTtl(text),
+    skills: parseVolunteerSkillsTtl(text),
   };
 }

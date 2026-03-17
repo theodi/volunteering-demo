@@ -1,11 +1,16 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
-import type { VolunteerCauses, VolunteerEquipment } from "@/app/lib/volunteerOntology";
+import type {
+  VolunteerCauses,
+  VolunteerEquipment,
+  VolunteerSkills,
+} from "@/app/lib/volunteerOntology";
 
 export type VolunteerOntologyContextValue = {
   causes: VolunteerCauses;
   equipment: VolunteerEquipment;
+  skills: VolunteerSkills;
 };
 
 const VolunteerOntologyContext = createContext<VolunteerOntologyContextValue | null>(null);
@@ -13,14 +18,16 @@ const VolunteerOntologyContext = createContext<VolunteerOntologyContextValue | n
 export function VolunteerOntologyProvider({
   causes,
   equipment,
+  skills,
   children,
 }: {
   causes: VolunteerCauses;
   equipment: VolunteerEquipment;
+  skills: VolunteerSkills;
   children: ReactNode;
 }) {
   return (
-    <VolunteerOntologyContext.Provider value={{ causes, equipment }}>
+    <VolunteerOntologyContext.Provider value={{ causes, equipment, skills }}>
       {children}
     </VolunteerOntologyContext.Provider>
   );

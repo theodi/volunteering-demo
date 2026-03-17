@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { HeartIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { HeartIcon, PlusIcon } from "@heroicons/react/24/outline";
 import ModalWrapper from "../ModalWrapper";
 import { ModalHeader } from "../ModalHeader";
+import { ModalSearchInput } from "../ModalSearchInput";
 import { CheckIconCustom } from "../svg/CheckIconCustom";
 import { useVolunteerCauses } from "@/app/lib/hooks/useVolunteerCauses";
 
@@ -55,20 +56,13 @@ export function AddCausesModal({
       <section className="w-full flex flex-col min-h-[55vh] max-h-[55vh]">
         <ModalHeader title="Add Causes" onClose={handleClose} icon={<HeartIcon className="h-6 w-6" />} />
 
-        {/* Search */}
-        <div className="px-5 pt-3">
-          <div className="flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2">
-            <MagnifyingGlassIcon className="h-5 w-5 shrink-0 text-gray-400" />
-            <input
-              type="search"
-              placeholder="Search Causes"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="min-w-0 flex-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
-              aria-label="Search causes"
-            />
-          </div>
-        </div>
+        <ModalSearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search Causes"
+          ariaLabel="Search causes"
+          className="px-5 pt-3"
+        />
 
         {/* Causes grid - scrollable */}
         <div className="overflow-y-auto px-5 py-4">

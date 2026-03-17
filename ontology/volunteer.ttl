@@ -258,3 +258,97 @@ vp:Venue a skos:Concept ;
 vp:Kitchen a skos:Concept ;
     skos:prefLabel "Kitchen"@en ;
     skos:broader vp:Facilities .
+
+
+# =============================================================================
+# Skills (by category) – SRS Appendix A
+# =============================================================================
+
+# Categories
+vp:PersonalQualities a skos:Concept ;
+    skos:prefLabel "Personal Qualities"@en .
+
+vp:Communication a skos:Concept ;
+    skos:prefLabel "Communication"@en .
+
+vp:Teamwork a skos:Concept ;
+    skos:prefLabel "Teamwork"@en .
+
+vp:SafetyAndAwareness a skos:Concept ;
+    skos:prefLabel "Safety & Awareness"@en .
+
+vp:PracticalSkills a skos:Concept ;
+    skos:prefLabel "Practical Skills"@en .
+
+vp:Technology a skos:Concept ;
+    skos:prefLabel "Technology"@en .
+
+vp:LocalKnowledge a skos:Concept ;
+    skos:prefLabel "Local Knowledge"@en .
+
+vp:SkillsScheme a skos:ConceptScheme ;
+    skos:hasTopConcept vp:PersonalQualities ;
+    skos:hasTopConcept vp:Communication ;
+    skos:hasTopConcept vp:Teamwork ;
+    skos:hasTopConcept vp:SafetyAndAwareness ;
+    skos:hasTopConcept vp:PracticalSkills ;
+    skos:hasTopConcept vp:Technology ;
+    skos:hasTopConcept vp:LocalKnowledge .
+
+# Personal Qualities
+vp:EmpathyAndCompassion a skos:Concept ; skos:prefLabel "Empathy and Compassion"@en ; skos:broader vp:PersonalQualities .
+vp:CalmnessUnderPressure a skos:Concept ; skos:prefLabel "Calmness Under Pressure"@en ; skos:broader vp:PersonalQualities .
+vp:PatienceAndUnderstanding a skos:Concept ; skos:prefLabel "Patience and Understanding"@en ; skos:broader vp:PersonalQualities .
+vp:ReliabilityAndTrustworthiness a skos:Concept ; skos:prefLabel "Reliability and Trustworthiness"@en ; skos:broader vp:PersonalQualities .
+vp:RespectForProfessionalBoundaries a skos:Concept ; skos:prefLabel "Respect for Professional Boundaries"@en ; skos:broader vp:PersonalQualities .
+vp:CulturalSensitivity a skos:Concept ; skos:prefLabel "Cultural Sensitivity"@en ; skos:broader vp:PersonalQualities .
+vp:TraumaInformedAwareness a skos:Concept ; skos:prefLabel "Trauma-Informed Awareness"@en ; skos:broader vp:PersonalQualities .
+vp:ConflictDeescalation a skos:Concept ; skos:prefLabel "Conflict De-escalation"@en ; skos:broader vp:PersonalQualities .
+
+# Communication
+vp:ClearSpokenCommunication a skos:Concept ; skos:prefLabel "Clear Spoken Communication"@en ; skos:broader vp:Communication .
+vp:ActiveListening a skos:Concept ; skos:prefLabel "Active Listening"@en ; skos:broader vp:Communication .
+vp:AbilityToRelayAccurateInformation a skos:Concept ; skos:prefLabel "Ability to Relay Accurate Information"@en ; skos:broader vp:Communication .
+vp:SupportingPeopleViaPhoneOnline a skos:Concept ; skos:prefLabel "Supporting People via Phone/Online"@en ; skos:broader vp:Communication .
+vp:UseOfRadiosAndWalkieTalkies a skos:Concept ; skos:prefLabel "Use of Radios and Walkie-Talkies"@en ; skos:broader vp:Communication .
+vp:ConfidenceEngagingWithPublicOrGroups a skos:Concept ; skos:prefLabel "Confidence Engaging with Public or Groups"@en ; skos:broader vp:Communication .
+
+# Teamwork
+vp:AbilityToWorkCooperatively a skos:Concept ; skos:prefLabel "Ability to Work Cooperatively"@en ; skos:broader vp:Teamwork .
+vp:AbilityToWorkIndependently a skos:Concept ; skos:prefLabel "Ability to Work Independently"@en ; skos:broader vp:Teamwork .
+vp:LeadingSmallGroupsOrTasks a skos:Concept ; skos:prefLabel "Leading Small Groups or Tasks"@en ; skos:broader vp:Teamwork .
+vp:ManagingConflictWithinTeams a skos:Concept ; skos:prefLabel "Managing Conflict Within Teams"@en ; skos:broader vp:Teamwork .
+vp:SupportingOrMentoringNewVolunteers a skos:Concept ; skos:prefLabel "Supporting or Mentoring New Volunteers"@en ; skos:broader vp:Teamwork .
+vp:UnderstandingEmergencyBriefingsAndInstructions a skos:Concept ; skos:prefLabel "Understanding Emergency Briefings and Instructions"@en ; skos:broader vp:Teamwork .
+
+# Safety & Awareness
+vp:BasicSafeguardingKnowledge a skos:Concept ; skos:prefLabel "Basic Safeguarding Knowledge"@en ; skos:broader vp:SafetyAndAwareness .
+vp:RiskAwareness a skos:Concept ; skos:prefLabel "Risk Awareness"@en ; skos:broader vp:SafetyAndAwareness .
+vp:SafeManualHandling a skos:Concept ; skos:prefLabel "Safe Manual Handling"@en ; skos:broader vp:SafetyAndAwareness .
+vp:IncidentReporting a skos:Concept ; skos:prefLabel "Incident Reporting"@en ; skos:broader vp:SafetyAndAwareness .
+vp:BasicFirstAidKnowledge a skos:Concept ; skos:prefLabel "Basic First Aid Knowledge"@en ; skos:broader vp:SafetyAndAwareness .
+vp:FireSafetyAwareness a skos:Concept ; skos:prefLabel "Fire Safety Awareness"@en ; skos:broader vp:SafetyAndAwareness .
+vp:WaterSafetyAwareness a skos:Concept ; skos:prefLabel "Water Safety Awareness"@en ; skos:broader vp:SafetyAndAwareness .
+
+# Practical Skills
+vp:Logistics a skos:Concept ; skos:prefLabel "Logistics"@en ; skos:broader vp:PracticalSkills .
+vp:ShelterSupport a skos:Concept ; skos:prefLabel "Shelter Support"@en ; skos:broader vp:PracticalSkills .
+vp:BasicRecordKeeping a skos:Concept ; skos:prefLabel "Basic Record Keeping"@en ; skos:broader vp:PracticalSkills .
+vp:UseOfBasicEquipment a skos:Concept ; skos:prefLabel "Use of Basic Equipment"@en ; skos:broader vp:PracticalSkills .
+vp:NavigationAndOrientation a skos:Concept ; skos:prefLabel "Navigation and Orientation"@en ; skos:broader vp:PracticalSkills .
+vp:Driving a skos:Concept ; skos:prefLabel "Driving"@en ; skos:broader vp:PracticalSkills .
+vp:CrowdQueueManagement a skos:Concept ; skos:prefLabel "Crowd/Queue Management"@en ; skos:broader vp:PracticalSkills .
+vp:PilotLicense a skos:Concept ; skos:prefLabel "Pilot License"@en ; skos:broader vp:PracticalSkills .
+vp:HGVCategoryD a skos:Concept ; skos:prefLabel "HGV Category D"@en ; skos:broader vp:PracticalSkills .
+
+# Technology
+vp:BasicITSkills a skos:Concept ; skos:prefLabel "Basic IT Skills"@en ; skos:broader vp:Technology .
+vp:ConfidentSmartphoneUse a skos:Concept ; skos:prefLabel "Confident Smartphone Use"@en ; skos:broader vp:Technology .
+vp:FamiliarityWithRemoteCommunicationTools a skos:Concept ; skos:prefLabel "Familiarity with Remote Communication Tools"@en ; skos:broader vp:Technology .
+vp:SimpleDataEntryAndReporting a skos:Concept ; skos:prefLabel "Simple Data Entry and Reporting"@en ; skos:broader vp:Technology .
+vp:ResponsibleHandlingOfSocialMedia a skos:Concept ; skos:prefLabel "Responsible Handling of Social Media"@en ; skos:broader vp:Technology .
+
+# Local Knowledge
+vp:KnowledgeOfLocalRoadsFacilitiesResources a skos:Concept ; skos:prefLabel "Knowledge of Local Roads, Facilities & Resources"@en ; skos:broader vp:LocalKnowledge .
+vp:UnderstandingDiverseNeedsWithinCommunity a skos:Concept ; skos:prefLabel "Understanding Diverse Needs Within Community"@en ; skos:broader vp:LocalKnowledge .
+vp:AwarenessOfLocalSupportServices a skos:Concept ; skos:prefLabel "Awareness of Local Support Services"@en ; skos:broader vp:LocalKnowledge .
