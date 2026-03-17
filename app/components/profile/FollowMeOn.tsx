@@ -80,7 +80,7 @@ export function FollowMeOn({
               title="No links yet"
               description="Add your social or profile links."
               icon={<ShareIcon className="h-5 w-5" />}
-              className="border-none "
+              className="border-none bg-transparent"
             />
           </div>
         )}

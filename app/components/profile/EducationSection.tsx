@@ -35,7 +35,7 @@ export function EducationSection({ items = [] }: { items?: EducationItem[] }) {
             title="No education yet"
             description="Add your schools and qualifications."
             icon={<AcademicCapIcon className="h-5 w-5" />}
-            className="border-none"
+            className="border-none bg-transparent"
           />
         )}
       </div>

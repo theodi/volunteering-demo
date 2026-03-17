@@ -41,7 +41,7 @@ export function ResumeSection({ items = [] }: { items?: ResumeItem[] }) {
             title="No experience yet"
             description="Add your work history and roles."
             icon={<BriefcaseIcon className="h-5 w-5" />}
-            className="border-none"
+            className="border-none bg-transparent"
           />
         )}
       </div>

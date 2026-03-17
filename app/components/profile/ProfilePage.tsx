@@ -23,17 +23,17 @@ export function ProfilePage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col items-start gap-5 px-4 py-8 md:px-6">
+    <main className="mx-auto flex w-full flex-col items-start gap-5 px-4 py-8 md:px-6">
       {error && (
         <div className="w-full rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
           Could not load full profile from WebID. Showing available data.
         </div>
       )}
       <section className="flex w-full flex-col items-start gap-5 md:flex-row md:items-stretch">
-        <div className="w-full md:max-w-[764px]">
+        <div className="w-full ">
           <ProfileHeader profile={profile} />
         </div>
-        <div className="w-full md:max-w-[320px]">
+        <div className="w-full md:max-w-1/3">
           <FollowMeOn
             profileLinks={profile?.socialLinks}
             className="h-full min-h-0"
@@ -47,7 +47,7 @@ export function ProfilePage() {
           <ResumeSection />
           <EducationSection />
         </div>
-        <aside className="w-full space-y-5 md:w-80 md:shrink-0">
+        <aside className="w-full space-y-5 md:max-w-1/3 md:shrink-0">
           <Skills />
           <Languages />
           <ScanProfile webId={profile?.webId} />

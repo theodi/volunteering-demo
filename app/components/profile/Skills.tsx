@@ -53,7 +53,7 @@ export function Skills({ skills = [] }: { skills?: string[] }) {
               title="No skills yet"
               description="Add skills that describe your experience."
               icon={<TagIcon className="h-5 w-5" />}
-              className="border-none"
+              className="border-none bg-transparent"
             />
           </div>
         )}

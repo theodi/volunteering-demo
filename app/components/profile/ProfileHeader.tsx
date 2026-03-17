@@ -33,7 +33,7 @@ export function ProfileHeader({ profile }: { profile?: UserProfile | null }) {
   const initial = displayName ? displayName.charAt(0).toUpperCase() : "?";
 
   return (
-    <Card>
+    <Card className="h-full!">
       <div className="flex items-center gap-4">
         <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200 sm:h-24 sm:w-24">
           {photoUrl ? (

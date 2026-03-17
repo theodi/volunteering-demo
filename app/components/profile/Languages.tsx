@@ -45,7 +45,7 @@ export function Languages({ items = [] }: { items?: LanguageItem[] }) {
             title="No languages yet"
             description="Add languages you speak and your level."
             icon={<LanguageIcon className="h-5 w-5" />}
-            className="border-none"
+            className="border-none bg-transparent"
           />
         )}
       </div>
