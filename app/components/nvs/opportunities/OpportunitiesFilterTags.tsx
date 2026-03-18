@@ -17,7 +17,7 @@ export interface OpportunitiesFilterTagsProps {
   onToggle?: (id: string) => void;
 }
 
-export default function OpportunitiesFilterTags({
+export function OpportunitiesFilterTags({
   selectedIds: controlledSelectedIds,
   onToggle,
 }: OpportunitiesFilterTagsProps) {

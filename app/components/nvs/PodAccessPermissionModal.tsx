@@ -1,9 +1,9 @@
 "use client";
 
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
-import Button from "../Button";
-import ModalWrapper from "../ModalWrapper";
-import HeroText from "../HeroText";
+import { Button } from "@/app/components/Button";
+import { ModalWrapper } from "@/app/components/ModalWrapper";
+import { HeroText } from "@/app/components/HeroText";
 
 const PERMISSIONS = [
   {
@@ -32,7 +32,7 @@ export interface PodAccessPermissionModalProps {
   onDecline?: () => void;
 }
 
-export default function PodAccessPermissionModal({
+export function PodAccessPermissionModal({
   isOpen,
   onClose,
   onAllow,
@@ -59,7 +59,7 @@ export default function PodAccessPermissionModal({
               following data from your Solid Pod to find you relevant volunteering
               opportunities."
             titleClassName="text-xl !font-bold !text-blue-custom sm:!text-2xl"
-            descriptionClassName="!mt-1.5 !text-sm !leading-relaxed !gray-700"
+            descriptionClassName="!mt-1.5 !text-sm !leading-relaxed !text-gray-700"
           />
 
 

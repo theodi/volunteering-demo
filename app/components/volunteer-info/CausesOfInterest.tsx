@@ -5,7 +5,7 @@ import { HeartIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { VolunteerInfoSection } from "./VolunteerInfoSection";
 import { useVolunteerCauses } from "@/app/lib/hooks/useVolunteerCauses";
-import { EmptyState } from "../profile/EmptyState";
+import { EmptyState } from "@/app/components/profile/EmptyState";
 import { AddCausesModal } from "./AddCausesModal";
 
 export function CausesOfInterest({

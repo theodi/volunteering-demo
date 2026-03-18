@@ -17,7 +17,7 @@ interface StepProgressProps {
 
 const DEFAULT_ACTIVE_CONNECTOR = "bg-blue-custom";
 
-export default function StepProgress({
+export function StepProgress({
   steps,
   currentStep,
   activeConnectorClass = DEFAULT_ACTIVE_CONNECTOR,

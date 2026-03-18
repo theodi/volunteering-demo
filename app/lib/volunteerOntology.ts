@@ -42,6 +42,10 @@ export type SkillCategories = Record<string, string[]>;
 export type VolunteerSkills = {
   categories: SkillCategories;
   allSkillLabels: string[];
+  /** Map from skill concept IRI to display label (for reading from Pod). */
+  skillIriToLabel: Record<string, string>;
+  /** Map from display label to skill concept IRI (for writing to Pod). */
+  labelToSkillIri: Record<string, string>;
 };
 
 // —— Shared SKOS helpers ——
@@ -157,7 +161,7 @@ export function parseVolunteerEquipmentTtl(turtleText: string): VolunteerEquipme
 }
 
 /**
- * Parses Turtle and returns skill categories and labels.
+ * Parses Turtle and returns skill categories, labels, and IRI↔label maps for Pod read/write.
  * Only includes concepts whose category is in the vp:SkillsScheme scheme.
  */
 export function parseVolunteerSkillsTtl(turtleText: string): VolunteerSkills {
@@ -166,6 +170,8 @@ export function parseVolunteerSkillsTtl(turtleText: string): VolunteerSkills {
   const skillCategoryLabels = new Set(categoryOrder);
 
   const categories: SkillCategories = {};
+  const skillIriToLabel: Record<string, string> = {};
+  const labelToSkillIri: Record<string, string> = {};
   for (const cat of categoryOrder) categories[cat] = [];
 
   for (const concept of dataset.conceptsWithBroader) {
@@ -173,9 +179,12 @@ export function parseVolunteerSkillsTtl(turtleText: string): VolunteerSkills {
     const catLabel = concept.categoryLabel;
     if (!label || !catLabel) continue;
     if (!skillCategoryLabels.has(catLabel)) continue;
+    const iri = concept.term.value;
     categories[catLabel].push(label);
+    skillIriToLabel[iri] = label;
+    labelToSkillIri[label] = iri;
   }
 
   const allSkillLabels = categoryOrder.flatMap((cat) => categories[cat] ?? []);
-  return { categories, allSkillLabels };
+  return { categories, allSkillLabels, skillIriToLabel, labelToSkillIri };
 }

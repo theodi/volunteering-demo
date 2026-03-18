@@ -22,7 +22,7 @@ const defaultTitleClasses =
 const defaultDescriptionClasses =
   "mt-3 max-w-lg text-base leading-relaxed tranquil-black sm:text-lg";
 
-export default function HeroText({
+export function HeroText({
   title,
   description,
   highlightedText,

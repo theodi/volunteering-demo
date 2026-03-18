@@ -10,7 +10,7 @@ export interface TagListProps {
   itemStyle?: React.CSSProperties;
 }
 
-export default function TagList({
+export function TagList({
   items,
   className = "",
   itemClassName = "",

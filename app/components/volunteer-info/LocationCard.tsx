@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { MapPinIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon as MapPinIconSolid } from "@heroicons/react/24/solid";
 import { DeploymentRadiusSlider } from "./DeploymentRadiusSlider";
-import { ActionMenu } from "../Dropdown";
+import { ActionMenu } from "@/app/components/Dropdown";
 
 export type LocationCardProps = {
   label: string;
@@ -26,20 +26,7 @@ export function LocationCard({
   onEdit,
   onDelete,
 }: LocationCardProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const Icon = isActive ? MapPinIcon : MapPinIcon;
-
-  const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    setMenuOpen(false);
-    onEdit?.();
-  };
-
-  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    setMenuOpen(false);
-    onDelete?.();
-  };
+  const Icon = isActive ? MapPinIconSolid : MapPinIcon;
 
   return (
     <div

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Dropdown from "../../Dropdown";
-import HeroText from "../../HeroText";
+import { Dropdown } from "../../Dropdown";
+import { HeroText } from "../../HeroText";
 
 const SORT_OPTIONS = [
   { value: "best-match", label: "Sort by: Best Match" },
@@ -18,7 +18,7 @@ export interface OpportunitiesHeaderSectionProps {
   onSortChange?: (value: string) => void;
 }
 
-export default function OpportunitiesHeaderSection({
+export function OpportunitiesHeaderSection({
   title = "Your Matched Opportunities",
   subtitle = "Based on your live Solid Pod data — Oxford, 10km radius",
   sortValue: controlledSortValue,
@@ -35,7 +35,7 @@ export default function OpportunitiesHeaderSection({
           title={title}
           description={subtitle}
           titleClassName="text-xl !font-bold !text-blue-custom sm:!text-2xl lg:!text-4xl"
-          descriptionClassName="!mt-1 !text-sm sm:!text-base lg:!text-lg !leading-relaxed !gray-700"
+          descriptionClassName="!mt-1 !text-sm sm:!text-base lg:!text-lg !leading-relaxed !text-gray-700"
         />
       </div>
       <div className="shrink-0">

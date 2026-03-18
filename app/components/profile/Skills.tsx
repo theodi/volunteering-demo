@@ -32,19 +32,47 @@ export function SkillTag({ label, onRemove }: SkillTagProps) {
   );
 }
 
-export function Skills({ skills: controlledSkills }: { skills?: string[] }) {
+export type SkillsProps = {
+  /** When provided, skills are loaded from and saved to the user's Pod (extended profile). */
+  skills?: string[];
+  /** Called when user saves in the modal or removes a tag; receives new full list of labels (debounced in hook). */
+  onSave?: (labels: string[]) => void;
+  isLoading?: boolean;
+  /** True while a save is pending or in flight (e.g. debounced write). */
+  isSaving?: boolean;
+  saveError?: Error | null;
+};
+
+export function Skills({
+  skills: controlledSkills,
+  onSave,
+  isLoading = false,
+  isSaving = false,
+  saveError = null,
+}: SkillsProps) {
   const [internalSkills, setInternalSkills] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
 
   const skills = controlledSkills ?? internalSkills;
+  const saving = onSave ? isSaving : false;
 
   const handleSaveSkills = (selected: string[]) => {
-    if (controlledSkills == null) setInternalSkills(selected);
-    setModalOpen(false);
+    if (onSave) {
+      onSave(selected);
+      setModalOpen(false);
+    } else {
+      setInternalSkills(selected);
+      setModalOpen(false);
+    }
   };
 
   const handleRemove = (skill: string) => {
-    if (controlledSkills == null) setInternalSkills((prev) => prev.filter((s) => s !== skill));
+    const next = skills.filter((s) => s !== skill);
+    if (onSave) {
+      onSave(next);
+    } else {
+      setInternalSkills(next);
+    }
   };
 
   return (
@@ -52,21 +80,33 @@ export function Skills({ skills: controlledSkills }: { skills?: string[] }) {
       <Card>
         <div className="mb-4 flex items-center justify-between">
           <SectionTitle>Skills</SectionTitle>
+          {saveError && (
+            <p className="text-sm text-amber-700" role="alert">
+              {saveError.message}
+            </p>
+          )}
           <Link
             href="#"
             className="text-sm font-medium text-primary hover:underline"
             onClick={(e) => {
               e.preventDefault();
-              setModalOpen(true);
+              if (!saving) setModalOpen(true);
             }}
+            aria-disabled={saving || isLoading}
           >
-            + Add More
+            {saving ? "Saving…" : "+ Add More"}
           </Link>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {skills.length > 0 ? (
+        <div className="flex flex-wrap gap-2 max-h-[30vh] overflow-y-auto">
+          {isLoading ? (
+            <p className="flex items-center justify-center text-sm text-slate-500">Loading skills…</p>
+          ) : skills.length > 0 ? (
             skills.map((skill) => (
-              <SkillTag key={skill} label={skill} onRemove={() => handleRemove(skill)} />
+              <SkillTag
+                key={skill}
+                label={skill}
+                onRemove={() => handleRemove(skill)}
+              />
             ))
           ) : (
             <div className="w-full h-full flex items-center justify-center">

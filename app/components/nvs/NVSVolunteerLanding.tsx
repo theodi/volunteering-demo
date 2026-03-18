@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Button from "../Button";
-import HeroText from "../HeroText";
-import TagList from "../TagList";
-import PodAccessPermissionModal from "./PodAccessPermissionModal";
-import EmergencyContactPermissionModal from "./EmergencyContactPermissionModal";
-import StepProgress from "../StepProgress";
+import { Button } from "@/app/components/Button";
+import { HeroText } from "@/app/components/HeroText";
+import { TagList } from "@/app/components/TagList";
+import { PodAccessPermissionModal } from "./PodAccessPermissionModal";
+import { EmergencyContactPermissionModal } from "./EmergencyContactPermissionModal";
+import { StepProgress } from "@/app/components/StepProgress";
 
 const STEPS = [
   { id: 1, label: "Share Pod" },
@@ -23,7 +23,7 @@ const ATTRIBUTE_TAGS = [
   "Equipment",
 ] as const;
 
-export default function NVSVolunteerLanding() {
+export function NVSVolunteerLanding() {
   const router = useRouter();
   const [isPodModalOpen, setIsPodModalOpen] = useState(false);
   const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);

@@ -1,9 +1,9 @@
 "use client";
 
-import Button from "../Button";
-import TagList from "../TagList";
-import ModalWrapper from "../ModalWrapper";
-import HeroText from "../HeroText";
+import { Button } from "@/app/components/Button";
+import { TagList } from "@/app/components/TagList";
+import { ModalWrapper } from "@/app/components/ModalWrapper";
+import { HeroText } from "@/app/components/HeroText";
 
 const ORGANISATIONS = ["British Red Cross", "Habitat for Humanity"] as const;
 
@@ -14,7 +14,7 @@ export interface EmergencyContactPermissionModalProps {
   onSearchOnly?: () => void;
 }
 
-export default function EmergencyContactPermissionModal({
+export function EmergencyContactPermissionModal({
   isOpen,
   onClose,
   onOptIn,
@@ -52,7 +52,7 @@ export default function EmergencyContactPermissionModal({
             declared emergencies such as floods, wildfires, or mass casualty
             events:"
               titleClassName="text-xl !font-bold !text-blue-custom sm:!text-2xl"
-              descriptionClassName="!mt-1.5 !text-sm !leading-relaxed !gray-700"
+              descriptionClassName="!mt-1.5 !text-sm !leading-relaxed !text-gray-700"
             />
           </div>
 

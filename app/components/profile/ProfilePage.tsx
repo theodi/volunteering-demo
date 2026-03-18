@@ -9,9 +9,17 @@ import { ResumeSection } from "./ResumeSection";
 import { ScanProfile } from "./ScanProfile";
 import { Skills } from "./Skills";
 import { useUserProfile } from "@/app/lib/hooks/useUserProfile";
+import { useVolunteerProfileSkills } from "@/app/lib/hooks/useVolunteerProfileSkills";
 
 export function ProfilePage() {
   const { profile, isLoading, error } = useUserProfile();
+  const {
+    skillLabels,
+    isLoading: skillsLoading,
+    isSaving: skillsSaving,
+    error: skillsError,
+    saveSkills,
+  } = useVolunteerProfileSkills();
 
   if (isLoading) {
     return (
@@ -48,7 +56,13 @@ export function ProfilePage() {
           <EducationSection />
         </div>
         <aside className="w-full space-y-5 md:max-w-1/3 md:shrink-0">
-          <Skills />
+          <Skills
+            skills={skillLabels}
+            onSave={saveSkills}
+            isLoading={skillsLoading}
+            isSaving={skillsSaving}
+            saveError={skillsError}
+          />
           <Languages />
           <ScanProfile webId={profile?.webId} />
         </aside>

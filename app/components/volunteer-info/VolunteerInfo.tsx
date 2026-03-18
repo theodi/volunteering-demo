@@ -3,7 +3,7 @@
 import { CausesOfInterest } from "./CausesOfInterest";
 import { EquipmentInventory } from "./EquipmentInventory";
 import { PreferredLocations } from "./PreferredLocations";
-import HeroText from "../HeroText";
+import { HeroText } from "@/app/components/HeroText";
 
 export function VolunteerInfo() {
   return (

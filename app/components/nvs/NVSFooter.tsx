@@ -11,7 +11,7 @@ const footerLinks = [
   { label: "Contact us", href: "#contact" },
 ] as const;
 
-export default function NVSFooter() {
+export function NVSFooter() {
   return (
     <footer
       className="shrink-0 border-t border-stone-200 px-4 py-6 sm:px-6 lg:px-8 bg-stone-100 font-sora"

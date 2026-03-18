@@ -8,7 +8,7 @@ interface NVSNavbarProps {
   userInitials?: string;
 }
 
-export default function NVSNavbar({
+export function NVSNavbar({
   userName = "Alex Morgan",
   userInitials = "AM",
 }: NVSNavbarProps) {

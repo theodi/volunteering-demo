@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import ModalWrapper from "../ModalWrapper";
-import { ModalHeader } from "../ModalHeader";
-import { LabeledInput } from "../LabeledInput";
-import Dropdown from "../Dropdown";
-import Button from "../Button";
+import { ModalWrapper } from "@/app/components/ModalWrapper";
+import { ModalHeader } from "@/app/components/ModalHeader";
+import { LabeledInput } from "@/app/components/LabeledInput";
+import { Dropdown } from "@/app/components/Dropdown";
+import { Button } from "@/app/components/Button";
 import type { EquipmentEntry } from "./EquipmentInventory";
 import { useVolunteerEquipment } from "@/app/lib/hooks/useVolunteerEquipment";
 

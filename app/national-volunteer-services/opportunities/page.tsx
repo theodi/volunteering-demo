@@ -1,6 +1,6 @@
 "use client";
 
-import VolunteeringOpportunities from "../../components/nvs/VolunteeringOpportunities";
+import { VolunteeringOpportunities } from "../../components/nvs/VolunteeringOpportunities";
 
 export default function OpportunitiesPage() {
   return (

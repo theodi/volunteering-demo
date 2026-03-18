@@ -1,5 +1,5 @@
-import NVSNavbar from "@/app/components/nvs/NVSNavbar";
-import NVSFooter from "@/app/components/nvs/NVSFooter";
+import { NVSNavbar } from "@/app/components/nvs/NVSNavbar";
+import { NVSFooter } from "@/app/components/nvs/NVSFooter";
 
 export default function NationalVolunteerServicesLayout({
   children,

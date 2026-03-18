@@ -1,9 +1,9 @@
 "use client";
 
 import type { MatchReason } from "./opportunities/OpportunityCard";
-import OpportunitiesFilterTags from "./opportunities/OpportunitiesFilterTags";
-import OpportunitiesHeaderSection from "./opportunities/OpportunitiesHeaderSection";
-import OpportunityCard from "./opportunities/OpportunityCard";
+import { OpportunitiesFilterTags } from "./opportunities/OpportunitiesFilterTags";
+import { OpportunitiesHeaderSection } from "./opportunities/OpportunitiesHeaderSection";
+import { OpportunityCard } from "./opportunities/OpportunityCard";
 
 const OPPORTUNITIES_DATA: Array<{
   organisationName: string;
@@ -57,7 +57,7 @@ const OPPORTUNITIES_DATA: Array<{
   },
 ];
 
-export default function VolunteeringOpportunities() {
+export function VolunteeringOpportunities() {
   return (
     <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-6 px-5 py-8 sm:px-10 sm:py-12">
       <OpportunitiesHeaderSection />

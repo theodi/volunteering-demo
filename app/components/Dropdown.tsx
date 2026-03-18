@@ -21,7 +21,7 @@ export interface DropdownProps {
   panelClassName?: string;
 }
 
-export default function Dropdown({
+export function Dropdown({
   options,
   value,
   onChange,

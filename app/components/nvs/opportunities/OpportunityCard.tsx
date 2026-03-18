@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Button from "../../Button";
+import { Button } from "../../Button";
 
 export interface MatchReason {
   text: string;
@@ -41,7 +41,7 @@ function getScoreColor(score: number): string {
   return "text-red-600";
 }
 
-export default function OpportunityCard({
+export function OpportunityCard({
   organisationName,
   matchScore,
   isEmergency,

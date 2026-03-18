@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { MagnifyingGlassIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { VolunteerInfoSection } from "./VolunteerInfoSection";
 import { LocationCard } from "./LocationCard";
-import { LocationMap } from "../map";
-import Button from "../Button";
+import { LocationMap } from "@/app/components/map";
+import { Button } from "@/app/components/Button";
 import { reverseGeocode, forwardGeocode } from "@/app/lib/geocode";
 
 export type SavedLocation = {
@@ -178,7 +178,7 @@ export function PreferredLocations({
 
   return (
     <VolunteerInfoSection
-      header={false}
+      showHeader={false}
       className="space-y-5!"
     >
       <div className="flex flex-col gap-0.5">

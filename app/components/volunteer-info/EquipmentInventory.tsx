@@ -5,7 +5,7 @@ import Link from "next/link";
 import { VanIcon } from "@/app/components/svg";
 import { VolunteerInfoSection } from "./VolunteerInfoSection";
 import { EquipmentItem } from "./EquipmentItem";
-import { EmptyState } from "../profile/EmptyState";
+import { EmptyState } from "@/app/components/profile/EmptyState";
 import { AddEquipmentModal } from "./AddEquipmentModal";
 import { AddCustomEquipmentModal } from "./AddCustomEquipmentModal";
 

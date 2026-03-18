@@ -10,7 +10,7 @@ export interface ModalWrapperProps {
   className?: string;
 }
 
-export default function ModalWrapper({
+export function ModalWrapper({
   isOpen,
   onClose,
   children,
@@ -36,8 +36,8 @@ export default function ModalWrapper({
   if (!isOpen) return null;
 
   return (
-    <main
-      className="fixed inset-0 z-1000 flex items-center justify-center p-4"
+    <div
+      className="fixed w-full h-full inset-0 z-1000 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
     >
@@ -53,6 +53,6 @@ export default function ModalWrapper({
       >
         {children}
       </div>
-    </main>
+    </div>
   );
 }

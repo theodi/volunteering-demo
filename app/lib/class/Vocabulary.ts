@@ -22,6 +22,11 @@ export const SCHEMA = {
   sameAs: "https://schema.org/sameAs",
 } as const;
 
+/** Volunteer profile schema – extended profile predicates (e.g. skills). */
+export const VOLUNTEER_SCHEMA = {
+  hasSkill: "https://id.volunteeringdata.io/schema/hasSkill",
+} as const;
+
 export const VCARD = {
   fn: "http://www.w3.org/2006/vcard/ns#fn",
   hasEmail: "http://www.w3.org/2006/vcard/ns#hasEmail",

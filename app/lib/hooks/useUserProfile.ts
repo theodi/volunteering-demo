@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSolidAuth } from "@ldo/solid-react";
-import { fetchAndParseProfile } from "@/app/lib/helpers/profileUtils";
+import { useMemo } from "react";
+import { useAgent } from "@/app/lib/hooks/useAgent";
+import type { Agent } from "@/app/lib/class/Agent";
 
 export interface UserProfile {
   name: string | null;
@@ -18,11 +18,9 @@ export interface UserProfile {
   note: string | null;
   location: string | null;
   preferredSubjectPronoun: string | null;
-  /** Social profile URLs by platform (facebook, instagram, twitter/x, snapchat). From schema:sameAs etc. */
   socialLinks: ProfileSocialLinks;
 }
 
-/** Platform keys for social links. */
 export type SocialPlatformKey =
   | "facebook"
   | "instagram"
@@ -49,7 +47,6 @@ const emptyProfile: UserProfile = {
   socialLinks: {},
 };
 
-/** Map schema:sameAs (and similar) URLs to profile social links by hostname. */
 function urlsToSocialLinks(urls: Set<string>): ProfileSocialLinks {
   const out: ProfileSocialLinks = {};
   for (const url of urls) {
@@ -69,12 +66,32 @@ function urlsToSocialLinks(urls: Set<string>): ProfileSocialLinks {
   }
   return out;
 }
+
 function normalizeContactValue(value: string | null): string | null {
   if (value == null || value === "") return null;
   const v = value.trim();
   if (v.startsWith("mailto:")) return v.slice(7).trim() || null;
   if (v.startsWith("tel:")) return v.slice(4).trim() || null;
   return v;
+}
+
+function agentToProfile(agent: Agent, webId: string): UserProfile {
+  return {
+    name: agent.name ?? null,
+    email: normalizeContactValue(agent.email) ?? agent.email ?? null,
+    photoUrl: agent.photoUrl ?? null,
+    phone: normalizeContactValue(agent.phone) ?? agent.phone ?? null,
+    organization: agent.organization ?? null,
+    role: agent.role ?? null,
+    title: agent.title ?? null,
+    website: agent.website ?? null,
+    webId,
+    bday: agent.bday ?? null,
+    note: agent.note ?? null,
+    location: agent.location ?? null,
+    preferredSubjectPronoun: agent.preferredSubjectPronoun ?? null,
+    socialLinks: urlsToSocialLinks(agent.sameAs),
+  };
 }
 
 export interface UseUserProfileResult {
@@ -84,73 +101,17 @@ export interface UseUserProfileResult {
 }
 
 /**
- * Fetches WebID profile using rdfjs-wrapper (solid-file-manager pattern).
- * When not logged in or fetch fails, returns profile with null fields for empty states.
+ * Derives the UserProfile from the shared Agent query.
+ * No separate fetch — reuses the same parsed profile as usePodRoot.
  */
 export function useUserProfile(): UseUserProfileResult {
-  const { session } = useSolidAuth();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { webId, agent, isLoading, error } = useAgent();
 
-  useEffect(() => {
-    async function load() {
-      try {
-        setError(null);
-        if (!session.isLoggedIn || !session.webId) {
-          setProfile(emptyProfile);
-          return;
-        }
-
-        const webId = session.webId;
-        const fetchFn =
-          typeof (session as { fetch?: typeof fetch }).fetch === "function"
-            ? (session as { fetch: typeof fetch }).fetch
-            : fetch;
-
-        const agent = await fetchAndParseProfile(webId, fetchFn);
-
-        if (!agent) {
-          setProfile({
-            ...emptyProfile,
-            webId,
-            name: webId.split("/").pop()?.split("#")[0] ?? webId,
-          });
-          return;
-        }
-
-        setProfile({
-          name: agent.name ?? null,
-          email: normalizeContactValue(agent.email) ?? agent.email ?? null,
-          photoUrl: agent.photoUrl ?? null,
-          phone: normalizeContactValue(agent.phone) ?? agent.phone ?? null,
-          organization: agent.organization ?? null,
-          role: agent.role ?? null,
-          title: agent.title ?? null,
-          website: agent.website ?? null,
-          webId,
-          bday: agent.bday ?? null,
-          note: agent.note ?? null,
-          location: agent.location ?? null,
-          preferredSubjectPronoun: agent.preferredSubjectPronoun ?? null,
-          socialLinks: urlsToSocialLinks(agent.sameAs),
-        });
-      } catch (err) {
-        setError(
-          err instanceof Error ? err : new Error("Failed to load profile")
-        );
-        setProfile(
-          session.webId
-            ? { ...emptyProfile, webId: session.webId }
-            : emptyProfile
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    load();
-  }, [session.isLoggedIn, session.webId]);
+  const profile = useMemo(() => {
+    if (!webId) return emptyProfile;
+    if (!agent) return { ...emptyProfile, webId };
+    return agentToProfile(agent, webId);
+  }, [agent, webId]);
 
   return { profile, isLoading, error };
 }
