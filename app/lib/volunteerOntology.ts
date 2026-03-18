@@ -24,6 +24,8 @@ export type CauseCategories = Record<string, string[]>;
 export type VolunteerCauses = {
   categories: CauseCategories;
   allCauseLabels: string[];
+  causeIriToLabel: Record<string, string>;
+  labelToCauseIri: Record<string, string>;
 };
 
 // —— Equipment ——
@@ -33,6 +35,8 @@ export type EquipmentCategories = Record<string, string[]>;
 export type VolunteerEquipment = {
   categories: EquipmentCategories;
   allEquipmentLabels: string[];
+  equipmentIriToLabel: Record<string, string>;
+  labelToEquipmentIri: Record<string, string>;
 };
 
 // —— Skills ——
@@ -116,6 +120,8 @@ function getCategoryLabelsFromScheme(
 export function parseVolunteerTtl(turtleText: string): VolunteerCauses {
   const { dataset } = parseTurtle(turtleText);
   const categories: CauseCategories = {};
+  const causeIriToLabel: Record<string, string> = {};
+  const labelToCauseIri: Record<string, string> = {};
   const categoryOrder: string[] = [];
   const seenCategories = new Set<string>();
 
@@ -129,11 +135,14 @@ export function parseVolunteerTtl(turtleText: string): VolunteerCauses {
       categoryOrder.push(catLabel);
       categories[catLabel] = [];
     }
+    const iri = concept.term.value;
     categories[catLabel].push(label);
+    causeIriToLabel[iri] = label;
+    labelToCauseIri[label] = iri;
   }
 
   const allCauseLabels = categoryOrder.flatMap((cat) => categories[cat] ?? []);
-  return { categories, allCauseLabels };
+  return { categories, allCauseLabels, causeIriToLabel, labelToCauseIri };
 }
 
 /**
@@ -146,6 +155,8 @@ export function parseVolunteerEquipmentTtl(turtleText: string): VolunteerEquipme
   const equipmentCategoryLabels = new Set(categoryOrder);
 
   const categories: EquipmentCategories = {};
+  const equipmentIriToLabel: Record<string, string> = {};
+  const labelToEquipmentIri: Record<string, string> = {};
   for (const cat of categoryOrder) categories[cat] = [];
 
   for (const concept of dataset.conceptsWithBroader) {
@@ -153,11 +164,14 @@ export function parseVolunteerEquipmentTtl(turtleText: string): VolunteerEquipme
     const catLabel = concept.categoryLabel;
     if (!label || !catLabel) continue;
     if (!equipmentCategoryLabels.has(catLabel)) continue;
+    const iri = concept.term.value;
     categories[catLabel].push(label);
+    equipmentIriToLabel[iri] = label;
+    labelToEquipmentIri[label] = iri;
   }
 
   const allEquipmentLabels = categoryOrder.flatMap((cat) => categories[cat] ?? []);
-  return { categories, allEquipmentLabels };
+  return { categories, allEquipmentLabels, equipmentIriToLabel, labelToEquipmentIri };
 }
 
 /**

@@ -4,39 +4,27 @@ import { useState } from "react";
 import { HeartIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { VolunteerInfoSection } from "./VolunteerInfoSection";
-import { useVolunteerCauses } from "@/app/lib/hooks/useVolunteerCauses";
 import { EmptyState } from "@/app/components/profile/EmptyState";
 import { AddCausesModal } from "./AddCausesModal";
+import { useVolunteerProfileCauses } from "@/app/lib/hooks/useVolunteerProfileCauses";
 
-export function CausesOfInterest({
-  causes: controlledCauses,
-  onRemove,
-  onAddMore,
-}: {
-  causes?: string[];
-  onRemove?: (cause: string) => void;
-  onAddMore?: () => void;
-}) {
-  const [internalCauses, setInternalCauses] = useState<string[]>([]);
+export function CausesOfInterest() {
   const [modalOpen, setModalOpen] = useState(false);
-  const { error } = useVolunteerCauses();
+  const {
+    causeLabels,
+    isLoading,
+    isSaving,
+    error,
+    saveCauses,
+  } = useVolunteerProfileCauses();
 
-  const isControlled = controlledCauses != null;
-  const selectedCauses = isControlled ? controlledCauses : internalCauses;
+  const handleSave = (selected: string[]) => {
+    saveCauses(selected);
+    setModalOpen(false);
+  };
 
   const handleRemove = (cause: string) => {
-    if (onRemove) onRemove(cause);
-    if (!isControlled) setInternalCauses((prev) => prev.filter((c) => c !== cause));
-  };
-
-  const handleAddMore = () => {
-    if (onAddMore) onAddMore();
-    else setModalOpen(true);
-  };
-
-  const handleSaveCauses = (selected: string[]) => {
-    if (!isControlled) setInternalCauses(selected);
-    setModalOpen(false);
+    saveCauses(causeLabels.filter((c) => c !== cause));
   };
 
   return (
@@ -50,19 +38,23 @@ export function CausesOfInterest({
             className="text-sm font-semibold text-primary underline"
             onClick={(e) => {
               e.preventDefault();
-              handleAddMore();
+              if (!isSaving) setModalOpen(true);
             }}
+            aria-disabled={isSaving || isLoading}
           >
-            + Add More
+            {isSaving ? "Saving…" : "+ Add More"}
           </Link>
         }
       >
         {error != null && (
-          <p className="w-full h-full flex items-center justify-center text-sm text-red-600">
-            Could not load causes from ontology. Please try again.
+          <p className="w-full h-full flex items-center justify-center text-sm text-red-600" role="alert">
+            {error.message}
           </p>
         )}
-        {!error && selectedCauses.length === 0 && (
+        {isLoading && (
+          <p className="flex items-center justify-center text-sm text-slate-500">Loading causes…</p>
+        )}
+        {!error && !isLoading && causeLabels.length === 0 && (
           <EmptyState
             title="No causes selected"
             description="Add causes you're interested in."
@@ -70,9 +62,9 @@ export function CausesOfInterest({
             className="border-none bg-transparent"
           />
         )}
-        {!error && selectedCauses.length > 0 && (
+        {!error && !isLoading && causeLabels.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            {selectedCauses.map((cause) => (
+            {causeLabels.map((cause) => (
               <span
                 key={cause}
                 className="inline-flex items-center gap-2 rounded-sm bg-gray-100 px-3 py-2.5 text-sm font-medium text-slate-900"
@@ -95,8 +87,8 @@ export function CausesOfInterest({
       <AddCausesModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        selectedCauses={selectedCauses}
-        onSave={handleSaveCauses}
+        selectedCauses={causeLabels}
+        onSave={handleSave}
       />
     </>
   );

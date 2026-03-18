@@ -19,7 +19,7 @@ function Field({
       {isEmpty ? (
         <EmptyState compact title="Not set" />
       ) : (
-        <span>{value}</span>
+        <span className="truncate">{value}</span>
       )}
     </li>
   );

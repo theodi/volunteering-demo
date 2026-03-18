@@ -1,15 +1,15 @@
 /**
- * Volunteer extended profile (SRS FR-1.4, FR-1.9): read/write skills in the
+ * Volunteer extended profile: read/write skills, causes, and equipment in the single
  * volunteer profile document at {pod}/volunteer/profile.ttl using ontology
- * predicate hasSkill (concept URIs). Uses rdfjs-wrapper VolunteerProfileSkills
- * for clean RDF access; N3 for serialization and raw fetch for HTTP.
+ * predicates hasSkill, hasCause, and hasEquipment (concept URIs). Uses rdfjs-wrapper
+ * VolunteerProfile for clean RDF access; N3 for serialization.
  *
  * All functions are pure async — caching and dedup are handled by React Query
  * at the hook layer.
  */
 
 import { Parser, Writer, Store, DataFactory } from "n3";
-import { wrapVolunteerProfileSkills } from "@/app/lib/class/VolunteerProfileSkills";
+import { wrapVolunteerProfile } from "@/app/lib/class/VolunteerProfile";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const FOAF_PERSON = "http://xmlns.com/foaf/0.1/Person";
@@ -51,16 +51,15 @@ function serializeToTurtle(store: Store): Promise<string> {
 }
 
 // ---------------------------------------------------------------------------
-// Read / write skills
+// Generic read / write for any VolunteerProfile property
 // ---------------------------------------------------------------------------
 
-/**
- * Reads skill concept URIs from {pod}/volunteer/profile.ttl (hasSkill objects).
- * Uses rdfjs-wrapper VolunteerProfileSkills.skills (WrappingSet) for clean RDF access.
- */
-export async function readSkillsFromPod(
+type ProfileProperty = "skills" | "causes" | "equipment";
+
+async function readPropertyFromPod(
   fetchFn: typeof fetch,
   podRoot: string,
+  property: ProfileProperty,
 ): Promise<string[]> {
   const { docUrl, subjectIri } = volunteerProfileDoc(podRoot);
 
@@ -76,7 +75,7 @@ export async function readSkillsFromPod(
 
   if (!response.ok) {
     if (response.status === 404) return [];
-    throw new Error(`Failed to read skills: ${response.status}`);
+    throw new Error(`Failed to read ${property}: ${response.status}`);
   }
 
   const text = await response.text();
@@ -85,19 +84,15 @@ export async function readSkillsFromPod(
   const store = parseTurtle(text, docUrl);
   if (!store) return [];
 
-  const profile = wrapVolunteerProfileSkills(subjectIri, store, DataFactory);
-  return [...profile.skills];
+  const profile = wrapVolunteerProfile(subjectIri, store, DataFactory);
+  return [...profile[property]];
 }
 
-/**
- * Writes skill concept URIs to {pod}/volunteer/profile.ttl.
- * Uses rdfjs-wrapper WrappingSet.clear() + .add() to mutate the dataset,
- * then serializes and PUTs the full document.
- */
-export async function writeSkillsToPod(
+async function writePropertyToPod(
   fetchFn: typeof fetch,
   podRoot: string,
-  skillUris: string[],
+  property: ProfileProperty,
+  uris: string[],
 ): Promise<void> {
   const { docUrl, subjectIri } = volunteerProfileDoc(podRoot);
 
@@ -120,11 +115,12 @@ export async function writeSkillsToPod(
     store.addQuad(subjectNode, DataFactory.namedNode(RDF_TYPE), DataFactory.namedNode(FOAF_PERSON));
   }
 
-  const profile = wrapVolunteerProfileSkills(subjectIri, store, DataFactory);
-  profile.skills.clear();
-  for (const uri of skillUris) {
+  const profile = wrapVolunteerProfile(subjectIri, store, DataFactory);
+  const set: Set<string> = profile[property];
+  set.clear();
+  for (const uri of uris) {
     const trimmed = uri.trim();
-    if (trimmed) profile.skills.add(trimmed);
+    if (trimmed) set.add(trimmed);
   }
 
   const turtle = await serializeToTurtle(store);
@@ -135,6 +131,36 @@ export async function writeSkillsToPod(
   });
 
   if (!putResponse.ok) {
-    throw new Error(`Failed to write skills: ${putResponse.status}`);
+    throw new Error(`Failed to write ${property}: ${putResponse.status}`);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Public API — skills
+// ---------------------------------------------------------------------------
+
+export const readSkillsFromPod = (fetchFn: typeof fetch, podRoot: string) =>
+  readPropertyFromPod(fetchFn, podRoot, "skills");
+
+export const writeSkillsToPod = (fetchFn: typeof fetch, podRoot: string, uris: string[]) =>
+  writePropertyToPod(fetchFn, podRoot, "skills", uris);
+
+// ---------------------------------------------------------------------------
+// Public API — causes
+// ---------------------------------------------------------------------------
+
+export const readCausesFromPod = (fetchFn: typeof fetch, podRoot: string) =>
+  readPropertyFromPod(fetchFn, podRoot, "causes");
+
+export const writeCausesToPod = (fetchFn: typeof fetch, podRoot: string, uris: string[]) =>
+  writePropertyToPod(fetchFn, podRoot, "causes", uris);
+
+// ---------------------------------------------------------------------------
+// Public API — equipment
+// ---------------------------------------------------------------------------
+
+export const readEquipmentFromPod = (fetchFn: typeof fetch, podRoot: string) =>
+  readPropertyFromPod(fetchFn, podRoot, "equipment");
+
+export const writeEquipmentToPod = (fetchFn: typeof fetch, podRoot: string, uris: string[]) =>
+  writePropertyToPod(fetchFn, podRoot, "equipment", uris);

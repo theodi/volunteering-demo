@@ -23,7 +23,7 @@ export function SkillTag({ label, onRemove }: SkillTagProps) {
           type="button"
           onClick={onRemove}
           aria-label={`Remove ${label}`}
-          className="rounded-full p-0.5 hover:bg-gray-200"
+          className="rounded-full p-0.5 hover:bg-gray-200 cursor-pointer"
         >
           <XMarkIcon className="h-3.5 w-3.5 text-gray-500" />
         </button>

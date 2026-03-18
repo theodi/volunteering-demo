@@ -8,6 +8,7 @@ import { EquipmentItem } from "./EquipmentItem";
 import { EmptyState } from "@/app/components/profile/EmptyState";
 import { AddEquipmentModal } from "./AddEquipmentModal";
 import { AddCustomEquipmentModal } from "./AddCustomEquipmentModal";
+import { useVolunteerProfileEquipment } from "@/app/lib/hooks/useVolunteerProfileEquipment";
 
 export type EquipmentEntry = {
   id: string;
@@ -15,39 +16,29 @@ export type EquipmentEntry = {
   description: string;
 };
 
-export function EquipmentInventory({
-  items: controlledItems,
-  onDelete,
-  onAddMore,
-}: {
-  items?: EquipmentEntry[];
-  onDelete?: (id: string) => void;
-  onAddMore?: () => void;
-}) {
-  const [internalItems, setInternalItems] = useState<EquipmentEntry[]>([]);
+export function EquipmentInventory() {
+  const {
+    equipmentEntries,
+    isLoading,
+    isSaving,
+    error,
+    saveEquipment,
+  } = useVolunteerProfileEquipment();
+
   const [modalOpen, setModalOpen] = useState(false);
   const [customModalOpen, setCustomModalOpen] = useState(false);
 
-  const isControlled = controlledItems != null;
-  const items = isControlled ? controlledItems : internalItems;
-
   const handleDelete = (id: string) => {
-    if (onDelete) onDelete(id);
-    if (!isControlled) setInternalItems((prev) => prev.filter((e) => e.id !== id));
-  };
-
-  const handleAddMore = () => {
-    if (onAddMore) onAddMore();
-    else setModalOpen(true);
+    saveEquipment(equipmentEntries.filter((e) => e.id !== id));
   };
 
   const handleSaveEquipment = (selected: EquipmentEntry[]) => {
-    if (!isControlled) setInternalItems(selected);
+    saveEquipment(selected);
     setModalOpen(false);
   };
 
   const handleAddCustomEquipment = (entry: EquipmentEntry) => {
-    if (!isControlled) setInternalItems((prev) => [...prev, entry]);
+    saveEquipment([...equipmentEntries, entry]);
   };
 
   return (
@@ -61,23 +52,33 @@ export function EquipmentInventory({
             className="text-sm font-semibold text-primary underline"
             onClick={(e) => {
               e.preventDefault();
-              handleAddMore();
+              if (!isSaving) setModalOpen(true);
             }}
+            aria-disabled={isSaving || isLoading}
           >
-            + Add More
+            {isSaving ? "Saving…" : "+ Add More"}
           </Link>
         }
       >
-        {items.length === 0 ? (
+        {error != null && (
+          <p className="w-full h-full flex items-center justify-center text-sm text-red-600" role="alert">
+            {error.message}
+          </p>
+        )}
+        {isLoading && (
+          <p className="flex items-center justify-center text-sm text-slate-500">Loading equipment…</p>
+        )}
+        {!error && !isLoading && equipmentEntries.length === 0 && (
           <EmptyState
             title="No equipment added"
             description="Add equipment you can provide."
             icon={<VanIcon className="h-5 w-5" />}
             className="border-none bg-transparent"
           />
-        ) : (
+        )}
+        {!error && !isLoading && equipmentEntries.length > 0 && (
           <div className="space-y-0">
-            {items.map((item) => (
+            {equipmentEntries.map((item) => (
               <EquipmentItem
                 key={item.id}
                 title={item.title}
@@ -92,7 +93,7 @@ export function EquipmentInventory({
       <AddEquipmentModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        selectedEquipment={items}
+        selectedEquipment={equipmentEntries}
         onSave={handleSaveEquipment}
         onRequestAddCustom={() => {
           setModalOpen(false);
