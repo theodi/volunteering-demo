@@ -17,14 +17,14 @@ import { ClockIcon } from "@heroicons/react/24/outline";
 const HOURS = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 0] as const;
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
 
-const TIME_PERIODS: { label: string; startHour: number; isNight?: boolean }[] = [
-  { label: "MORNING", startHour: 6 },
-  { label: "AFTERNOON", startHour: 12 },
-  { label: "EVENING", startHour: 17 },
+const TIME_PERIODS: { label: string; startHour: number; isMorning?: boolean; isAfternoon?: boolean; isEvening?: boolean; isNight?: boolean }[] = [
+  { label: "MORNING", startHour: 6, isMorning: true },
+  { label: "AFTERNOON", startHour: 12, isAfternoon: true },
+  { label: "EVENING", startHour: 17, isEvening: true },
   { label: "NIGHT", startHour: 21, isNight: true },
 ];
 
-const TIME_COL_WIDTH = 64;
+const TIME_COL_WIDTH = 80;
 const GRID_COLS = `${TIME_COL_WIDTH}px repeat(7, 1fr)`;
 
 // ---------------------------------------------------------------------------
@@ -209,7 +209,7 @@ export function AvailabilityScheduler({ weekStart }: AvailabilitySchedulerProps)
   // -- Render ---------------------------------------------------------------
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+    <div className="overflow-x-auto rounded-md border border-slate-200 bg-white">
       <div
         ref={gridRef}
         className="relative min-w-[700px] select-none"
@@ -218,32 +218,29 @@ export function AvailabilityScheduler({ weekStart }: AvailabilitySchedulerProps)
       >
         {/* Day header row */}
         <div
-          className="sticky top-0 z-20 grid border-b border-slate-200 bg-white"
+          className="sticky top-0 z-20 grid border-b border-sparkling-silver/60 bg-white"
           style={{ gridTemplateColumns: GRID_COLS }}
         >
-          <div className="flex items-center justify-center border-r border-slate-200 py-3">
-            <ClockIcon className="h-5 w-5 text-gray-400" />
+          <div className="min-w-[80px] w-full flex items-center justify-center border-r border-slate-100 py-3 sm:py-7">
+            <ClockIcon className="h-5 w-5 text-slate-300" />
           </div>
           {weekDates.map((date, i) => {
             const today = isToday(i);
             return (
               <div
                 key={i}
-                className={`flex flex-col items-center justify-center py-3 text-center ${
-                  i < 6 ? "border-r border-slate-200" : ""
-                } ${today ? "bg-primary/3" : ""}`}
+                className={`flex flex-col items-center justify-center py-3 sm:py-7 text-center ${i < 6 ? "border-r border-slate-100" : ""
+                  } ${today ? "bg-primary/3" : ""}`}
               >
                 <span
-                  className={`text-xs font-semibold uppercase tracking-wide ${
-                    today ? "text-primary" : "text-gray-500"
-                  }`}
+                  className={`text-xs font-semibold uppercase tracking-wide ${today ? "text-primary" : "text-slate-400"
+                    }`}
                 >
                   {DAY_LABELS[i]}
                 </span>
                 <span
-                  className={`mt-0.5 flex h-7 w-7 items-center justify-center text-sm font-bold ${
-                    today ? "rounded-full bg-primary text-white" : "text-gray-900"
-                  }`}
+                  className={`flex h-7 w-7 items-center justify-center text-sm font-medium ${today ? "rounded-full bg-primary text-white drop-shadow-xl" : "text-slate-700"
+                    }`}
                 >
                   {date.getDate()}
                 </span>
@@ -261,21 +258,19 @@ export function AvailabilityScheduler({ weekStart }: AvailabilitySchedulerProps)
                 <div key={rowIdx} className="contents">
                   {/* Time label */}
                   <div
-                    className={`flex flex-col justify-start border-r border-slate-200 px-1.5 pt-0.5 ${
-                      rowIdx < HOURS.length - 1 ? "border-b border-b-slate-100" : ""
-                    }`}
-                    style={{ minHeight: 40 }}
+                    className={`min-w-[80px] w-full flex flex-col justify-center items-center border-r border-slate-100 px- py-1.5 text-center bg-white ${rowIdx < HOURS.length - 1 ? "border-b border-b-slate-100" : ""
+                      }`}
+                    style={{ minHeight: 55 }}
                   >
                     {period && (
                       <span
-                        className={`text-[10px] font-bold uppercase leading-tight ${
-                          period.isNight ? "text-gray-900" : "text-amber-500"
-                        }`}
+                        className={`text-[10px] font-bold uppercase leading-tight py-[2px] px-2 rounded-full mb-2 ${period.isMorning ? "bg-blue-50 text-blue-400" : period.isAfternoon ? "bg-orange-50 text-orange-400" : period.isEvening ? "bg-yellow-100 text-yellow-600" : "text-gray-900"
+                          } ${period.isNight ? "bg-slate-100 text-slate-500" : ""}`}
                       >
                         {period.label}
                       </span>
                     )}
-                    <span className="text-xs leading-tight text-gray-400">
+                    <span className="text-xs leading-tight text-slate-400 font-medium">
                       {formatHour(hour)}
                     </span>
                   </div>
@@ -291,9 +286,8 @@ export function AvailabilityScheduler({ weekStart }: AvailabilitySchedulerProps)
                     return (
                       <div
                         key={dayIdx}
-                        className={`relative cursor-pointer border-r border-slate-200 last:border-r-0 ${
-                          rowIdx < HOURS.length - 1 ? "border-b border-b-slate-100" : ""
-                        } ${isToday(dayIdx) ? "bg-primary/3" : ""}`}
+                        className={`relative cursor-pointer bg-slate-50 hover:bg-slate-100 border-r border-slate-200 last:border-r-0 ${rowIdx < HOURS.length - 1 ? "border-b border-b-slate-100" : ""
+                          } ${isToday(dayIdx) ? "bg-primary/3" : ""}`}
                         style={{ minHeight: 40 }}
                         onMouseDown={(e: ReactMouseEvent) => {
                           e.preventDefault();

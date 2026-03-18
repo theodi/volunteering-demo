@@ -2,8 +2,8 @@ import { VolunteerAvailability } from "@/app/components/availability/VolunteerAv
 
 export default function AvailabilityPage() {
   return (
-    <div className="mx-auto max-w-6xl p-4 sm:p-6">
+    <main className="mx-auto w-full p-4 sm:p-6">
       <VolunteerAvailability />
-    </div>
+    </main>
   );
 }

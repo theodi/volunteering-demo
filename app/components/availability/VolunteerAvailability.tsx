@@ -4,9 +4,10 @@ import { useState } from "react";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  CalendarDaysIcon,
-} from "@heroicons/react/24/outline";
+  CalendarIcon,
+} from "@heroicons/react/24/solid";
 import { AvailabilityScheduler } from "./AvailabilityScheduler";
+import { HeroText } from "@/app/components/HeroText";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -51,19 +52,17 @@ export function VolunteerAvailability() {
     });
 
   return (
-    <div className="w-full space-y-5 font-sans">
+    <div className="w-full space-y-4 sm:space-y-[30px] font-app">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight text-gray-900">
-            Availability
-          </h2>
-          <p className="text-sm text-gray-500">
-            Select the times when you&apos;re available to volunteer.
-          </p>
-        </div>
+        <HeroText
+          title="Availability"
+          description="Select the times when you&apos;re available to volunteer."
+          titleClassName="text-xl! sm:text-2xl! font-semibold tracking-tight text-black!"
+          descriptionClassName="mt-0! text-sm! sm:text-base! leading-relaxed text-slate-700!"
+        />
 
-        <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-sm text-gray-700">
+        <div className="flex shrink-0 items-center gap-2.5 rounded-md border border-gray-300 px-2.5 py-2 text-sm text-gray-600">
           <button
             type="button"
             onClick={prevWeek}
@@ -72,7 +71,7 @@ export function VolunteerAvailability() {
           >
             <ChevronLeftIcon className="h-4 w-4" />
           </button>
-          <CalendarDaysIcon className="h-4 w-4 text-gray-500" />
+          <CalendarIcon className="h-4 w-4 text-gray-500" />
           <span className="whitespace-nowrap font-medium">
             {formatDateRange(weekStart)}
           </span>
