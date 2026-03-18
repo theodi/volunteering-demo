@@ -77,7 +77,7 @@ export function EquipmentInventory() {
           />
         )}
         {!error && !isLoading && equipmentEntries.length > 0 && (
-          <div className="space-y-0">
+          <div className="space-y-0 max-h-[40vh] overflow-y-auto">
             {equipmentEntries.map((item) => (
               <EquipmentItem
                 key={item.id}
