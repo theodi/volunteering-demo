@@ -7,6 +7,7 @@ import { LocationCard } from "./LocationCard";
 import { LocationMap } from "@/app/components/map";
 import { Button } from "@/app/components/Button";
 import { reverseGeocode, forwardGeocode } from "@/app/lib/geocode";
+import { useVolunteerProfileLocations } from "@/app/lib/hooks/useVolunteerProfileLocations";
 
 export type SavedLocation = {
   id: string;
@@ -27,9 +28,16 @@ export function PreferredLocations({
   onSearch?: (query: string) => void;
   onUseMyLocation?: () => void;
 }) {
+  const {
+    locations: savedLocations,
+    isLoading: podLoading,
+    isSaving,
+    error: podError,
+    saveLocations,
+  } = useVolunteerProfileLocations();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [pinnedLocation, setPinnedLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [savedLocations, setSavedLocations] = useState<SavedLocation[]>([]);
   const [activeLocationId, setActiveLocationId] = useState<string | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
@@ -47,18 +55,20 @@ export function PreferredLocations({
     };
   }, [pinnedLocation?.lat, pinnedLocation?.lng]);
 
-  // Keep saved locations in sync with pinnedLocation + searchQuery
   useEffect(() => {
     if (pinnedLocation == null || searchQuery.trim() === "") return;
     const id = `${pinnedLocation.lat.toFixed(5)},${pinnedLocation.lng.toFixed(5)}`;
-    setSavedLocations((prev) => {
-      const existing = prev.find((l) => l.id === id);
-      if (existing) {
-        return prev.map((l) =>
-          l.id === id ? { ...l, label: searchQuery.trim() } : l,
+    const existing = savedLocations.find((l) => l.id === id);
+    if (existing) {
+      if (existing.label !== searchQuery.trim()) {
+        saveLocations(
+          savedLocations.map((l) =>
+            l.id === id ? { ...l, label: searchQuery.trim() } : l,
+          ),
         );
       }
-      return [
+    } else {
+      saveLocations([
         {
           id,
           label: searchQuery.trim(),
@@ -66,9 +76,9 @@ export function PreferredLocations({
           lng: pinnedLocation.lng,
           radiusKm: radiusKm ?? 10,
         },
-        ...prev,
-      ];
-    });
+        ...savedLocations,
+      ]);
+    }
     setActiveLocationId(id);
   }, [pinnedLocation, searchQuery, radiusKm]);
 
@@ -147,18 +157,18 @@ export function PreferredLocations({
 
   const handleRadiusForLocation = useCallback(
     (id: string, value: number) => {
-      setSavedLocations((prev) =>
-        prev.map((l) => (l.id === id ? { ...l, radiusKm: value } : l)),
+      saveLocations(
+        savedLocations.map((l) => (l.id === id ? { ...l, radiusKm: value } : l)),
       );
       onRadiusChange?.(value);
     },
-    [onRadiusChange],
+    [savedLocations, saveLocations, onRadiusChange],
   );
 
   const handleDeleteLocation = useCallback((id: string) => {
-    setSavedLocations((prev) => prev.filter((l) => l.id !== id));
+    saveLocations(savedLocations.filter((l) => l.id !== id));
     setActiveLocationId((current) => (current === id ? null : current));
-  }, []);
+  }, [savedLocations, saveLocations]);
 
   const handleEditLocation = useCallback(
     (id: string) => {
@@ -269,11 +279,20 @@ export function PreferredLocations({
 
       {/* Your locations */}
       <div className="space-y-4">
-        <h3 className="text-base font-medium text-gray-900">
-          Your locations
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-medium text-gray-900">
+            Your locations
+          </h3>
+          {isSaving && <span className="text-xs text-slate-500">Saving…</span>}
+        </div>
+        {podError != null && (
+          <p className="text-sm text-red-600" role="alert">{podError.message}</p>
+        )}
         <div className="space-y-3">
-          {savedLocations.map((loc) => (
+          {podLoading && (
+            <p className="text-sm text-slate-500">Loading saved locations…</p>
+          )}
+          {!podLoading && savedLocations.map((loc) => (
             <LocationCard
               key={loc.id}
               label={loc.label}
@@ -286,7 +305,7 @@ export function PreferredLocations({
               onDelete={() => handleDeleteLocation(loc.id)}
             />
           ))}
-          {savedLocations.length === 0 && (
+          {!podLoading && savedLocations.length === 0 && (
             <p className="text-sm text-hydrocarbon">
               Add a location using the map or search above.
             </p>

@@ -27,6 +27,11 @@ export const VOLUNTEER_SCHEMA = {
   hasSkill: "https://id.volunteeringdata.io/schema/hasSkill",
   hasCause: "https://id.volunteeringdata.io/schema/hasCause",
   hasEquipment: "https://id.volunteeringdata.io/schema/hasEquipment",
+  hasLocation: "https://id.volunteeringdata.io/schema/hasLocation",
+  latitude: "https://id.volunteeringdata.io/schema/latitude",
+  longitude: "https://id.volunteeringdata.io/schema/longitude",
+  distance: "https://id.volunteeringdata.io/schema/distance",
+  locationLabel: "https://id.volunteeringdata.io/schema/locationLabel",
 } as const;
 
 export const VCARD = {
