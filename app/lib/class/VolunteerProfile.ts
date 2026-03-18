@@ -5,67 +5,78 @@ import {
   ObjectMapping,
 } from "rdfjs-wrapper";
 import type { DatasetCore, DataFactory } from "@rdfjs/types";
-import { VOLUNTEER_SCHEMA } from "@/app/lib/class/Vocabulary";
+import { VP, GEO, RDFS } from "@/app/lib/class/Vocabulary";
 
 /**
- * Wraps a single location blank node under hasLocation.
- * Each node carries lat, lon, distance (metres), and a human-readable label.
+ * Wraps a vp:Point blank node (geo:lat, geo:long).
  */
-export class LocationNode extends TermWrapper {
-  get latitude(): number | null {
-    const v = this.singularNullable(VOLUNTEER_SCHEMA.latitude, ValueMapping.literalToString);
+export class PointNode extends TermWrapper {
+  get lat(): number | null {
+    const v = this.singularNullable(GEO.lat, ValueMapping.literalToString);
     return v != null ? Number(v) : null;
   }
-  get longitude(): number | null {
-    const v = this.singularNullable(VOLUNTEER_SCHEMA.longitude, ValueMapping.literalToString);
+  get long(): number | null {
+    const v = this.singularNullable(GEO.long, ValueMapping.literalToString);
     return v != null ? Number(v) : null;
   }
-  /** Search radius in metres. */
-  get distance(): number | null {
-    const v = this.singularNullable(VOLUNTEER_SCHEMA.distance, ValueMapping.literalToString);
+}
+
+/**
+ * Wraps a vp:PreferredLocation blank node.
+ * Contains a nested vp:Point (with geo:lat / geo:long) and vp:rad (km).
+ */
+export class PreferredLocationNode extends TermWrapper {
+  get point(): PointNode | null {
+    return this.singularNullable(VP.point, ObjectMapping.as(PointNode)) ?? null;
+  }
+
+  /** Radius in kilometres. */
+  get rad(): number | null {
+    const v = this.singularNullable(VP.rad, ValueMapping.literalToString);
     return v != null ? Number(v) : null;
   }
+
   get label(): string | null {
-    return this.singularNullable(VOLUNTEER_SCHEMA.locationLabel, ValueMapping.literalToString) ?? null;
+    return this.singularNullable(RDFS.label, ValueMapping.literalToString) ?? null;
   }
 }
 
 /**
  * Wraps the volunteer profile document subject ({pod}/volunteer/profile.ttl#me).
  * Exposes skills, causes, equipment as read/write IRI sets, and locations as
- * structured LocationNode objects via rdfjs-wrapper.
+ * structured PreferredLocationNode objects via rdfjs-wrapper.
  */
 export class VolunteerProfile extends TermWrapper {
   get skills(): Set<string> {
     return this.objects(
-      VOLUNTEER_SCHEMA.hasSkill,
+      VP.hasSkill,
       ValueMapping.iriToString,
-      TermMapping.stringToIri
+      TermMapping.stringToIri,
     );
   }
 
   get causes(): Set<string> {
     return this.objects(
-      VOLUNTEER_SCHEMA.hasCause,
+      VP.preferredCause,
       ValueMapping.iriToString,
-      TermMapping.stringToIri
+      TermMapping.stringToIri,
     );
   }
 
   get equipment(): Set<string> {
     return this.objects(
-      VOLUNTEER_SCHEMA.hasEquipment,
+      VP.hasRequirement,
       ValueMapping.iriToString,
-      TermMapping.stringToIri
+      TermMapping.stringToIri,
     );
   }
 
-  /** Read-only: location blank nodes. Use writeLocationsToPod for mutations. */
-  get locationNodes(): Set<LocationNode> {
+  /** Read-only: preferred location nodes. Use writeLocationsToPod for mutations. */
+  get locationNodes(): Set<PreferredLocationNode> {
     return this.objects(
-      VOLUNTEER_SCHEMA.hasLocation,
-      ObjectMapping.as(LocationNode),
-      ObjectMapping.as(LocationNode),
+      VP.preferredLocation,
+      ObjectMapping.as(PreferredLocationNode),
+      ObjectMapping.as(PreferredLocationNode),
     );
   }
 }
@@ -73,7 +84,7 @@ export class VolunteerProfile extends TermWrapper {
 export function wrapVolunteerProfile(
   subjectIri: string,
   dataset: DatasetCore,
-  factory: DataFactory
+  factory: DataFactory,
 ): VolunteerProfile {
   const subject = factory.namedNode(subjectIri);
   return new VolunteerProfile(subject, dataset, factory);

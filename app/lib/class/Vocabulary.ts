@@ -22,16 +22,31 @@ export const SCHEMA = {
   sameAs: "https://schema.org/sameAs",
 } as const;
 
-/** Volunteer profile schema – extended profile predicates (skills, causes, etc.). */
-export const VOLUNTEER_SCHEMA = {
-  hasSkill: "https://id.volunteeringdata.io/schema/hasSkill",
-  hasCause: "https://id.volunteeringdata.io/schema/hasCause",
-  hasEquipment: "https://id.volunteeringdata.io/schema/hasEquipment",
-  hasLocation: "https://id.volunteeringdata.io/schema/hasLocation",
-  latitude: "https://id.volunteeringdata.io/schema/latitude",
-  longitude: "https://id.volunteeringdata.io/schema/longitude",
-  distance: "https://id.volunteeringdata.io/schema/distance",
-  locationLabel: "https://id.volunteeringdata.io/schema/locationLabel",
+/**
+ * Volunteer Profile ontology (vp:) — all volunteer-profile predicates and classes.
+ * @see https://github.com/theodi/volunteer-profile-manager/blob/main/src/ontology/volunteer.ttl
+ */
+export const VP = {
+  VolunteerProfile: "https://id.volunteeringdata.io/volunteer-profile/VolunteerProfile",
+  hasSkill: "https://id.volunteeringdata.io/volunteer-profile/hasSkill",
+  preferredCause: "https://id.volunteeringdata.io/volunteer-profile/preferredCause",
+  hasRequirement: "https://id.volunteeringdata.io/volunteer-profile/hasRequirement",
+  PreferredLocation: "https://id.volunteeringdata.io/volunteer-profile/PreferredLocation",
+  Point: "https://id.volunteeringdata.io/volunteer-profile/Point",
+  preferredLocation: "https://id.volunteeringdata.io/volunteer-profile/preferredLocation",
+  point: "https://id.volunteeringdata.io/volunteer-profile/point",
+  /** Radius in kilometres. */
+  rad: "https://id.volunteeringdata.io/volunteer-profile/rad",
+} as const;
+
+/** W3C WGS84 Geo Positioning vocabulary. */
+export const GEO = {
+  lat: "http://www.w3.org/2003/01/geo/wgs84_pos#lat",
+  long: "http://www.w3.org/2003/01/geo/wgs84_pos#long",
+} as const;
+
+export const RDFS = {
+  label: "http://www.w3.org/2000/01/rdf-schema#label",
 } as const;
 
 export const VCARD = {

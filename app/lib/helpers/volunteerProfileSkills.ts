@@ -9,11 +9,10 @@
 
 import { Parser, Writer, Store, DataFactory } from "n3";
 import { wrapVolunteerProfile } from "@/app/lib/class/VolunteerProfile";
-import { VOLUNTEER_SCHEMA } from "@/app/lib/class/Vocabulary";
+import { VP, GEO, RDFS } from "@/app/lib/class/Vocabulary";
 import type { SavedLocation } from "@/app/components/volunteer-info/PreferredLocations";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-const FOAF_PERSON = "http://xmlns.com/foaf/0.1/Person";
 
 /** Constructs the volunteer profile doc URL and subject IRI from the pod root. */
 function volunteerProfileDoc(podRoot: string): { docUrl: string; subjectIri: string } {
@@ -38,9 +37,9 @@ function serializeToTurtle(store: Store): Promise<string> {
   const writer = new Writer({
     prefixes: {
       vp: "https://id.volunteeringdata.io/volunteer-profile/",
-      schema: "https://id.volunteeringdata.io/schema/",
-      foaf: "http://xmlns.com/foaf/0.1/",
       rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+      geo: "http://www.w3.org/2003/01/geo/wgs84_pos#",
     },
   });
   for (const q of store.getQuads(null, null, null, null)) {
@@ -113,7 +112,7 @@ async function writePropertyToPod(
 
   const subjectNode = DataFactory.namedNode(subjectIri);
   if (store.getQuads(subjectNode, DataFactory.namedNode(RDF_TYPE), null, null).length === 0) {
-    store.addQuad(subjectNode, DataFactory.namedNode(RDF_TYPE), DataFactory.namedNode(FOAF_PERSON));
+    store.addQuad(subjectNode, DataFactory.namedNode(RDF_TYPE), DataFactory.namedNode(VP.VolunteerProfile));
   }
 
   const profile = wrapVolunteerProfile(subjectIri, store, DataFactory);
@@ -172,7 +171,10 @@ export const writeEquipmentToPod = (fetchFn: typeof fetch, podRoot: string, uris
 
 /**
  * Reads locations from {pod}/volunteer/profile.ttl.
- * Uses rdfjs-wrapper LocationNode to read structured blank node properties.
+ * Structure follows the volunteer-profile ontology:
+ *   <#me> vp:preferredLocation _:loc.
+ *   _:loc a vp:PreferredLocation; vp:point _:pt; vp:rad "10"; rdfs:label "...".
+ *   _:pt a vp:Point; geo:lat "51.5"; geo:long "-0.1".
  */
 export async function readLocationsFromPod(
   fetchFn: typeof fetch,
@@ -203,26 +205,30 @@ export async function readLocationsFromPod(
 
   const profile = wrapVolunteerProfile(subjectIri, store, DataFactory);
   const locations: SavedLocation[] = [];
-  for (const node of profile.locationNodes) {
-    const lat = node.latitude;
-    const lon = node.longitude;
+  for (const locNode of profile.locationNodes) {
+    const pt = locNode.point;
+    if (!pt) continue;
+    const lat = pt.lat;
+    const lon = pt.long;
     if (lat == null || lon == null) continue;
-    const distanceM = node.distance ?? 10000;
     locations.push({
       id: `${lat.toFixed(5)},${lon.toFixed(5)}`,
-      label: node.label ?? "",
+      label: locNode.label ?? "",
       lat,
       lng: lon,
-      radiusKm: distanceM / 1000,
+      radiusKm: locNode.rad ?? 10,
     });
   }
   return locations;
 }
 
 /**
- * Writes locations to {pod}/volunteer/profile.ttl as blank nodes under hasLocation.
- * Each blank node stores lat, lon, distance (metres), and label.
- * Clears existing location nodes, preserving all other triples (skills, causes, etc.).
+ * Writes locations to {pod}/volunteer/profile.ttl following the volunteer-profile ontology:
+ *   <#me> vp:preferredLocation _:loc.
+ *   _:loc a vp:PreferredLocation; vp:point _:pt; vp:rad "10"; rdfs:label "...".
+ *   _:pt a vp:Point; geo:lat "51.5"; geo:long "-0.1".
+ *
+ * Clears existing location nodes (and their nested points), preserving other triples.
  */
 export async function writeLocationsToPod(
   fetchFn: typeof fetch,
@@ -247,31 +253,50 @@ export async function writeLocationsToPod(
 
   const subjectNode = DataFactory.namedNode(subjectIri);
   if (store.getQuads(subjectNode, DataFactory.namedNode(RDF_TYPE), null, null).length === 0) {
-    store.addQuad(subjectNode, DataFactory.namedNode(RDF_TYPE), DataFactory.namedNode(FOAF_PERSON));
+    store.addQuad(subjectNode, DataFactory.namedNode(RDF_TYPE), DataFactory.namedNode(VP.VolunteerProfile));
   }
 
-  const hasLocation = DataFactory.namedNode(VOLUNTEER_SCHEMA.hasLocation);
-  const latPred = DataFactory.namedNode(VOLUNTEER_SCHEMA.latitude);
-  const lonPred = DataFactory.namedNode(VOLUNTEER_SCHEMA.longitude);
-  const distPred = DataFactory.namedNode(VOLUNTEER_SCHEMA.distance);
-  const labelPred = DataFactory.namedNode(VOLUNTEER_SCHEMA.locationLabel);
+  const prefLocPred = DataFactory.namedNode(VP.preferredLocation);
+  const pointPred = DataFactory.namedNode(VP.point);
 
-  for (const q of store.getQuads(subjectNode, hasLocation, null, null)) {
-    for (const prop of store.getQuads(q.object, null, null, null)) {
-      store.removeQuad(prop);
+  // Remove existing location graphs: for each preferredLocation blank node,
+  // remove its nested point blank node's triples, then the location's own triples.
+  for (const locQuad of store.getQuads(subjectNode, prefLocPred, null, null)) {
+    const locBNode = locQuad.object;
+    for (const ptQuad of store.getQuads(locBNode, pointPred, null, null)) {
+      for (const ptProp of store.getQuads(ptQuad.object, null, null, null)) {
+        store.removeQuad(ptProp);
+      }
     }
-    store.removeQuad(q);
+    for (const locProp of store.getQuads(locBNode, null, null, null)) {
+      store.removeQuad(locProp);
+    }
+    store.removeQuad(locQuad);
   }
+
+  const rdfType = DataFactory.namedNode(RDF_TYPE);
+  const prefLocType = DataFactory.namedNode(VP.PreferredLocation);
+  const pointType = DataFactory.namedNode(VP.Point);
+  const radPred = DataFactory.namedNode(VP.rad);
+  const labelPred = DataFactory.namedNode(RDFS.label);
+  const latPred = DataFactory.namedNode(GEO.lat);
+  const lonPred = DataFactory.namedNode(GEO.long);
 
   for (const loc of locations) {
-    const bnode = DataFactory.blankNode();
-    store.addQuad(subjectNode, hasLocation, bnode);
-    store.addQuad(bnode, latPred, DataFactory.literal(String(loc.lat)));
-    store.addQuad(bnode, lonPred, DataFactory.literal(String(loc.lng)));
-    store.addQuad(bnode, distPred, DataFactory.literal(String(Math.round(loc.radiusKm * 1000))));
+    const locBNode = DataFactory.blankNode();
+    const ptBNode = DataFactory.blankNode();
+
+    store.addQuad(subjectNode, prefLocPred, locBNode);
+    store.addQuad(locBNode, rdfType, prefLocType);
+    store.addQuad(locBNode, pointPred, ptBNode);
+    store.addQuad(locBNode, radPred, DataFactory.literal(String(loc.radiusKm)));
     if (loc.label) {
-      store.addQuad(bnode, labelPred, DataFactory.literal(loc.label));
+      store.addQuad(locBNode, labelPred, DataFactory.literal(loc.label));
     }
+
+    store.addQuad(ptBNode, rdfType, pointType);
+    store.addQuad(ptBNode, latPred, DataFactory.literal(String(loc.lat)));
+    store.addQuad(ptBNode, lonPred, DataFactory.literal(String(loc.lng)));
   }
 
   const turtle = await serializeToTurtle(store);
