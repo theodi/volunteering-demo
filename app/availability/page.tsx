@@ -1,10 +1,9 @@
+import { VolunteerAvailability } from "@/app/components/availability/VolunteerAvailability";
+
 export default function AvailabilityPage() {
   return (
-    <div className="p-6 font-sans">
-      <h1 className="text-2xl font-semibold tracking-tight">
-        Availability
-      </h1>
-      <p className="mt-2">Availability settings will go here.</p>
+    <div className="mx-auto max-w-6xl p-4 sm:p-6">
+      <VolunteerAvailability />
     </div>
   );
 }
