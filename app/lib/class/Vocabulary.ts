@@ -23,7 +23,7 @@ export const SCHEMA = {
 } as const;
 
 /**
- * Volunteer Profile ontology (vp:) — all volunteer-profile predicates and classes.
+ * Volunteer Profile ontology (vp:) — profile predicates and classes.
  * @see https://github.com/theodi/volunteer-profile-manager/blob/main/src/ontology/volunteer.ttl
  */
 export const VP = {
@@ -37,7 +37,15 @@ export const VP = {
   point: "https://id.volunteeringdata.io/volunteer-profile/point",
   /** Radius in kilometres. */
   rad: "https://id.volunteeringdata.io/volunteer-profile/rad",
+  preferredTime: "https://id.volunteeringdata.io/volunteer-profile/preferredTime",
 } as const;
+
+/**
+ * Volunteering Data Model namespace — taxonomy terms (skills, causes,
+ * requirements) and pre-composed temporal entities (MondayMorning, etc.).
+ * @see https://standard.volunteeringdata.io/ontology/
+ */
+export const VOLUNTEERING_NS = "https://ns.volunteeringdata.io/" as const;
 
 /** W3C WGS84 Geo Positioning vocabulary. */
 export const GEO = {

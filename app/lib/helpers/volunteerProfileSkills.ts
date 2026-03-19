@@ -9,7 +9,7 @@
 
 import { Parser, Writer, Store, DataFactory } from "n3";
 import { wrapVolunteerProfile } from "@/app/lib/class/VolunteerProfile";
-import { VP, GEO, RDFS } from "@/app/lib/class/Vocabulary";
+import { VP, GEO, RDFS, VOLUNTEERING_NS } from "@/app/lib/class/Vocabulary";
 import type { SavedLocation } from "@/app/components/volunteer-info/PreferredLocations";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
@@ -37,6 +37,7 @@ function serializeToTurtle(store: Store): Promise<string> {
   const writer = new Writer({
     prefixes: {
       vp: "https://id.volunteeringdata.io/volunteer-profile/",
+      volunteering: "https://ns.volunteeringdata.io/",
       rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       rdfs: "http://www.w3.org/2000/01/rdf-schema#",
       geo: "http://www.w3.org/2003/01/geo/wgs84_pos#",
@@ -54,7 +55,7 @@ function serializeToTurtle(store: Store): Promise<string> {
 // Generic read / write for any VolunteerProfile property
 // ---------------------------------------------------------------------------
 
-type ProfileProperty = "skills" | "causes" | "equipment";
+type ProfileProperty = "skills" | "causes" | "equipment" | "preferredTimes";
 
 async function readPropertyFromPod(
   fetchFn: typeof fetch,
@@ -309,4 +310,79 @@ export async function writeLocationsToPod(
   if (!putResponse.ok) {
     throw new Error(`Failed to write locations: ${putResponse.status}`);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Public API — availability (PreferredTime as composed IRIs)
+// ---------------------------------------------------------------------------
+
+const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
+const PERIOD_NAMES = ["Morning", "Afternoon", "Evening"] as const;
+
+const PERIOD_HOURS: Record<string, number[]> = {
+  Morning: [6, 7, 8, 9, 10, 11],
+  Afternoon: [12, 13, 14, 15, 16, 17],
+  Evening: [18, 19, 20, 21, 22, 23, 0],
+};
+
+const TIME_IRI_LOOKUP = new Map<string, { dayIdx: number; hours: number[] }>();
+for (let d = 0; d < 7; d++) {
+  for (const period of PERIOD_NAMES) {
+    TIME_IRI_LOOKUP.set(`${VOLUNTEERING_NS}${DAY_NAMES[d]}${period}`, { dayIdx: d, hours: PERIOD_HOURS[period] });
+  }
+}
+
+/**
+ * Converts scheduler slot keys ("dayIdx-hour") to composed time IRIs
+ * (e.g. https://ns.volunteeringdata.io/MondayMorning).
+ */
+export function slotsToTimeIris(slots: Set<string>): string[] {
+  const result: string[] = [];
+  for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+    for (const period of PERIOD_NAMES) {
+      if (PERIOD_HOURS[period].some((h) => slots.has(`${dayIdx}-${h}`))) {
+        result.push(`${VOLUNTEERING_NS}${DAY_NAMES[dayIdx]}${period}`);
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * Expands composed time IRIs back into scheduler slot keys.
+ */
+export function timeIrisToSlots(iris: string[]): Set<string> {
+  const slots = new Set<string>();
+  for (const iri of iris) {
+    const entry = TIME_IRI_LOOKUP.get(iri);
+    if (!entry) continue;
+    for (const h of entry.hours) {
+      slots.add(`${entry.dayIdx}-${h}`);
+    }
+  }
+  return slots;
+}
+
+/**
+ * Reads preferred times from {pod}/volunteer/profile.ttl and returns
+ * scheduler slot keys (Set<"dayIdx-hour">).
+ */
+export async function readTimesFromPod(
+  fetchFn: typeof fetch,
+  podRoot: string,
+): Promise<Set<string>> {
+  const iris = await readPropertyFromPod(fetchFn, podRoot, "preferredTimes");
+  return timeIrisToSlots(iris);
+}
+
+/**
+ * Writes preferred times to {pod}/volunteer/profile.ttl as composed IRIs:
+ *   <#me> vp:preferredTime volunteering:MondayMorning, volunteering:WednesdayEvening .
+ */
+export async function writeTimesToPod(
+  fetchFn: typeof fetch,
+  podRoot: string,
+  slots: Set<string>,
+): Promise<void> {
+  await writePropertyToPod(fetchFn, podRoot, "preferredTimes", slotsToTimeIris(slots));
 }

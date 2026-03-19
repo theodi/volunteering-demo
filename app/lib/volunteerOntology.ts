@@ -13,7 +13,7 @@ const SKOS = {
   hasTopConcept: "http://www.w3.org/2004/02/skos/core#hasTopConcept",
 } as const;
 
-const BASE_IRI = "https://id.volunteeringdata.io/volunteer-profile/";
+const BASE_IRI = "https://ns.volunteeringdata.io/";
 const EQUIPMENT_SCHEME_IRI = `${BASE_IRI}EquipmentRequirements`;
 const SKILLS_SCHEME_IRI = `${BASE_IRI}SkillsScheme`;
 

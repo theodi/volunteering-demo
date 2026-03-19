@@ -3,7 +3,7 @@
 # https://github.com/theodi/volunteer-profile-manager/blob/main/src/ontology/volunteer.ttl
 #
 # Namespaces
-@prefix vp:   <https://id.volunteeringdata.io/volunteer-profile/> .
+@prefix vp:   <https://ns.volunteeringdata.io/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .

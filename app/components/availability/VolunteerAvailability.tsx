@@ -8,6 +8,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { AvailabilityScheduler } from "./AvailabilityScheduler";
 import { HeroText } from "@/app/components/HeroText";
+import { useVolunteerProfileAvailability } from "@/app/lib/hooks/useVolunteerProfileAvailability";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -36,6 +37,8 @@ function formatDateRange(weekStart: Date): string {
 
 export function VolunteerAvailability() {
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
+  const { selectedSlots, isLoading, isSaving, error, saveSlots } =
+    useVolunteerProfileAvailability();
 
   const prevWeek = () =>
     setWeekStart((p) => {
@@ -86,8 +89,27 @@ export function VolunteerAvailability() {
         </div>
       </div>
 
+      {/* Status indicators */}
+      {isLoading && (
+        <p className="text-sm text-slate-500">Loading availability…</p>
+      )}
+      {error && (
+        <p className="text-sm text-red-500">{error.message}</p>
+      )}
+
       {/* Scheduler grid */}
-      <AvailabilityScheduler weekStart={weekStart} />
+      <div className="relative">
+        <AvailabilityScheduler
+          weekStart={weekStart}
+          selectedSlots={selectedSlots}
+          onSlotsChange={saveSlots}
+        />
+        {isSaving && (
+          <span className="absolute right-2 top-2 z-30 rounded bg-white/80 px-2 py-1 text-xs text-slate-500 shadow-sm">
+            Saving…
+          </span>
+        )}
+      </div>
     </div>
   );
 }

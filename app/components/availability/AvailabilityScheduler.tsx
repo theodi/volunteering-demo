@@ -46,6 +46,37 @@ function periodForHour(hour: number): (typeof TIME_PERIODS)[number] | null {
   return null;
 }
 
+/**
+ * Ontology-aligned period groups. Selections snap to full periods so that
+ * the save/load round-trip through vp:PreferredTime (Morning/Afternoon/Evening)
+ * is lossless.
+ */
+const PERIOD_HOUR_GROUPS: number[][] = [
+  [6, 7, 8, 9, 10, 11],
+  [12, 13, 14, 15, 16],
+  [17, 18, 19, 20, 21, 22, 23, 0],
+];
+
+function getPeriodHours(hour: number): number[] {
+  for (const group of PERIOD_HOUR_GROUPS) {
+    if (group.includes(hour)) return group;
+  }
+  return [hour];
+}
+
+function expandToPeriods(slots: Set<string>): Set<string> {
+  const expanded = new Set<string>();
+  for (const key of slots) {
+    const dash = key.indexOf("-");
+    const dayIdx = parseInt(key.slice(0, dash));
+    const hour = parseInt(key.slice(dash + 1));
+    for (const h of getPeriodHours(hour)) {
+      expanded.add(slotKey(dayIdx, h));
+    }
+  }
+  return expanded;
+}
+
 // ---------------------------------------------------------------------------
 // Drag helpers
 // ---------------------------------------------------------------------------
@@ -109,14 +140,15 @@ function findBlocks(selected: Set<string>, dayIndex: number): Block[] {
 
 export type AvailabilitySchedulerProps = {
   weekStart: Date;
+  selectedSlots: Set<string>;
+  onSlotsChange: (slots: Set<string>) => void;
 };
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export function AvailabilityScheduler({ weekStart }: AvailabilitySchedulerProps) {
-  const [selectedSlots, setSelectedSlots] = useState<Set<string>>(new Set());
+export function AvailabilityScheduler({ weekStart, selectedSlots, onSlotsChange }: AvailabilitySchedulerProps) {
   const [dragState, setDragState] = useState<DragState>(null);
   const [now, setNow] = useState(() => new Date());
   const gridRef = useRef<HTMLDivElement>(null);
@@ -152,9 +184,12 @@ export function AvailabilityScheduler({ weekStart }: AvailabilitySchedulerProps)
 
   const handleCellDown = useCallback(
     (dayIndex: number, hour: number) => {
-      const adding = !selectedSlots.has(slotKey(dayIndex, hour));
+      const periodHrs = getPeriodHours(hour);
+      const allSelected = periodHrs.every((h) =>
+        selectedSlots.has(slotKey(dayIndex, h)),
+      );
       setDragState({
-        adding,
+        adding: !allSelected,
         startDay: dayIndex,
         startHour: hour,
         currentDay: dayIndex,
@@ -175,25 +210,23 @@ export function AvailabilityScheduler({ weekStart }: AvailabilitySchedulerProps)
 
   const commitDrag = useCallback(() => {
     if (!dragState) return;
-    const slots = getDragSlots(dragState);
-    setSelectedSlots((prev) => {
-      const next = new Set(prev);
-      for (const key of slots) {
-        if (dragState.adding) next.add(key);
-        else next.delete(key);
-      }
-      return next;
-    });
+    const expanded = expandToPeriods(getDragSlots(dragState));
+    const next = new Set(selectedSlots);
+    for (const key of expanded) {
+      if (dragState.adding) next.add(key);
+      else next.delete(key);
+    }
+    onSlotsChange(next);
     setDragState(null);
-  }, [dragState]);
+  }, [dragState, selectedSlots, onSlotsChange]);
 
   // -- Derived state --------------------------------------------------------
 
   const effectiveSelection = useMemo(() => {
     if (!dragState) return selectedSlots;
     const eff = new Set(selectedSlots);
-    const slots = getDragSlots(dragState);
-    for (const key of slots) {
+    const expanded = expandToPeriods(getDragSlots(dragState));
+    for (const key of expanded) {
       if (dragState.adding) eff.add(key);
       else eff.delete(key);
     }

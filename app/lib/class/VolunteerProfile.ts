@@ -43,8 +43,8 @@ export class PreferredLocationNode extends TermWrapper {
 
 /**
  * Wraps the volunteer profile document subject ({pod}/volunteer/profile.ttl#me).
- * Exposes skills, causes, equipment as read/write IRI sets, and locations as
- * structured PreferredLocationNode objects via rdfjs-wrapper.
+ * Exposes skills, causes, equipment, preferred times as read/write IRI sets,
+ * and locations as structured PreferredLocationNode objects.
  */
 export class VolunteerProfile extends TermWrapper {
   get skills(): Set<string> {
@@ -77,6 +77,15 @@ export class VolunteerProfile extends TermWrapper {
       VP.preferredLocation,
       ObjectMapping.as(PreferredLocationNode),
       ObjectMapping.as(PreferredLocationNode),
+    );
+  }
+
+  /** Preferred time IRIs (e.g. volunteering:MondayMorning). */
+  get preferredTimes(): Set<string> {
+    return this.objects(
+      VP.preferredTime,
+      ValueMapping.iriToString,
+      TermMapping.stringToIri,
     );
   }
 }
