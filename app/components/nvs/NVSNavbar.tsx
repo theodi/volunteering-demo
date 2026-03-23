@@ -4,11 +4,17 @@ import { StarIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 
 interface NVSNavbarProps {
+  title?: string;
+  subtitle?: string;
+  showUser?: boolean;
   userName?: string;
   userInitials?: string;
 }
 
 export function NVSNavbar({
+  title = "National Volunteer Services",
+  subtitle = "Powered by Solid Pod Technology",
+  showUser = true,
   userName = "Alex Morgan",
   userInitials = "AM",
 }: NVSNavbarProps) {
@@ -39,23 +45,25 @@ export function NVSNavbar({
       >
         <div className="space-y-0.5">
           <h1 className="text-xl font-bold leading-tight sm:text-2xl">
-            National Volunteer Services
+            {title}
           </h1>
           <p className="text-xs text-white sm:text-sm font-normal">
-            Powered by Solid Pod Technology
+            {subtitle}
           </p>
         </div>
-        <div className="flex items-center gap-2 text-white">
-          <span className="text-xs sm:text-sm font-normal">
-            Logged in as {userName}
-          </span>
-          <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-earth-blue"
-            aria-hidden
-          >
-            {userInitials}
+        {showUser && (
+          <div className="flex items-center gap-2 text-white">
+            <span className="text-xs sm:text-sm font-normal">
+              Logged in as {userName}
+            </span>
+            <div
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-earth-blue"
+              aria-hidden
+            >
+              {userInitials}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Beta feedback bar */}

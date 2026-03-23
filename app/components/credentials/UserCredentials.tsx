@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { PlusIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { CredentialCard } from "./CredentialCard";
 import type { CredentialStatus } from "./CredentialCard";
@@ -17,9 +17,48 @@ type CredentialItem = {
     status: CredentialStatus;
 };
 
+const STORAGE_KEY = "user-credentials";
+
+function loadCredentials(): CredentialItem[] {
+    if (typeof window === "undefined") return [];
+    const stored = sessionStorage.getItem(STORAGE_KEY);
+    if (!stored) return [];
+    try { return JSON.parse(stored); } catch { return []; }
+}
+
+function saveCredentials(items: CredentialItem[]) {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+}
+
 export function UserCredentials() {
     const [credentials, setCredentials] = useState<CredentialItem[]>([]);
     const [modalOpen, setModalOpen] = useState(false);
+
+    // Load credentials from sessionStorage on mount
+    useEffect(() => {
+        const saved = loadCredentials();
+
+        // Check if any credentials were just verified (returning from verify page)
+        const updated = saved.map((cred) => {
+            const verifiedFlag = sessionStorage.getItem(`credential-verified-${cred.id}`);
+            if (verifiedFlag === "true" && cred.status !== "verified") {
+                sessionStorage.removeItem(`credential-verified-${cred.id}`);
+                return { ...cred, status: "verified" as CredentialStatus };
+            }
+            return cred;
+        });
+
+        setCredentials(updated);
+        saveCredentials(updated);
+    }, []);
+
+    const updateCredentials = useCallback((updater: (prev: CredentialItem[]) => CredentialItem[]) => {
+        setCredentials((prev) => {
+            const next = updater(prev);
+            saveCredentials(next);
+            return next;
+        });
+    }, []);
 
     const handleAddCredential = (cred: CredentialType) => {
         const newItem: CredentialItem = {
@@ -28,7 +67,7 @@ export function UserCredentials() {
             issuer: cred.issuer,
             status: "collect",
         };
-        setCredentials((prev) => [...prev, newItem]);
+        updateCredentials((prev) => [...prev, newItem]);
     };
 
     const existingIds = new Set(credentials.map((c) => c.id.replace(/-\d+$/, "")));
@@ -74,6 +113,7 @@ export function UserCredentials() {
                             {credentials.map((cred) => (
                                 <CredentialCard
                                     key={cred.id}
+                                    credentialId={cred.id}
                                     title={cred.title}
                                     issuer={cred.issuer}
                                     status={cred.status}

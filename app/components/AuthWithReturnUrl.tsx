@@ -17,7 +17,8 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
       config={{ loginPath: "/login", homePath: "/" }}
     >
       <AuthGuard fallback={<LoadingScreen />}>
-        {pathname?.startsWith("/national-volunteer-services") ? (
+        {pathname?.startsWith("/national-volunteer-services") ||
+        pathname?.startsWith("/credentials/verify") ? (
           children
         ) : (
           <AppLayout>{children}</AppLayout>
