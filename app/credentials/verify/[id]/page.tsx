@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { CheckCircleIcon, ShieldCheckIcon } from "@heroicons/react/24/solid";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/app/components/Button";
 import { NVSNavbar } from "@/app/components/nvs/NVSNavbar";
 import { NVSFooter } from "@/app/components/nvs/NVSFooter";
@@ -23,21 +24,38 @@ export default function VerifyCredentialPage() {
     const credentialId = params.id as string;
 
     const { credentials, isLoading, updateStatus } = useCredentials();
-    const [isClaiming, setIsClaiming] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [action, setAction] = useState<"claim" | "unclaim" | null>(null);
 
     // Find the credential from the Pod data
     const credential = credentials.find((c) => c.id === credentialId);
     const title = credential?.title ?? "UK DBS Check";
     const issuer = credential?.issuer ?? "Disclosure and Barring Service GOV.UK";
+    const isVerified = credential?.status === "verified";
 
     const handleClaim = async () => {
-        setIsClaiming(true);
+        setAction("claim");
+        setIsProcessing(true);
         try {
             await updateStatus(credentialId, "verified");
             router.push("/credentials");
         } catch (err) {
             console.error("Failed to claim credential:", err);
-            setIsClaiming(false);
+            setIsProcessing(false);
+            setAction(null);
+        }
+    };
+
+    const handleUnclaim = async () => {
+        setAction("unclaim");
+        setIsProcessing(true);
+        try {
+            await updateStatus(credentialId, "collect");
+            router.push("/credentials");
+        } catch (err) {
+            console.error("Failed to unclaim credential:", err);
+            setIsProcessing(false);
+            setAction(null);
         }
     };
 
@@ -81,19 +99,36 @@ export default function VerifyCredentialPage() {
                 </div>
 
                 {/* Status panel */}
-                <div className="mt-8 rounded-lg border border-green-200 bg-green-50 p-5 sm:p-6">
-                    <div className="flex items-center gap-3">
-                        <ShieldCheckIcon className="h-6 w-6 shrink-0 text-green-600 sm:h-7 sm:w-7" />
-                        <div>
-                            <h3 className="text-base font-bold text-green-800 sm:text-lg">
-                                Verification Complete
-                            </h3>
-                            <p className="mt-0.5 text-sm text-green-700">
-                                This credential has been verified and is ready to collect.
-                            </p>
+                {isVerified ? (
+                    <div className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-5 sm:p-6">
+                        <div className="flex items-center gap-3">
+                            <ExclamationTriangleIcon className="h-6 w-6 shrink-0 text-amber-600 sm:h-7 sm:w-7" />
+                            <div>
+                                <h3 className="text-base font-bold text-amber-800 sm:text-lg">
+                                    Credential Already Claimed
+                                </h3>
+                                <p className="mt-0.5 text-sm text-amber-700">
+                                    This credential is currently verified. You can unclaim it to
+                                    remove it from your verified credentials.
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="mt-8 rounded-lg border border-green-200 bg-green-50 p-5 sm:p-6">
+                        <div className="flex items-center gap-3">
+                            <ShieldCheckIcon className="h-6 w-6 shrink-0 text-green-600 sm:h-7 sm:w-7" />
+                            <div>
+                                <h3 className="text-base font-bold text-green-800 sm:text-lg">
+                                    Verification Complete
+                                </h3>
+                                <p className="mt-0.5 text-sm text-green-700">
+                                    This credential has been verified and is ready to collect.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Verification details */}
                 <section className="mt-8">
@@ -132,21 +167,26 @@ export default function VerifyCredentialPage() {
                         </div>
                         <div>
                             <dt className="text-xs font-medium text-gray-500">Status</dt>
-                            <dd className="mt-0.5 text-sm font-semibold text-green-700">Clear — No convictions</dd>
+                            <dd className={`mt-0.5 text-sm font-semibold ${isVerified ? "text-amber-700" : "text-green-700"}`}>
+                                {isVerified ? "Verified — Claimed" : "Clear — No convictions"}
+                            </dd>
                         </div>
                     </dl>
                 </section>
 
-                {/* Claim button */}
+                {/* Action button */}
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                     <Button
-                        variant="primary"
+                        variant={action === "unclaim" ? "secondary" : "primary"}
                         size="lg"
-                        onClick={handleClaim}
-                        disabled={isClaiming}
+                        onClick={isVerified ? handleUnclaim : handleClaim}
+                        disabled={isProcessing}
                         className="rounded-none!"
                     >
-                        {isClaiming ? "Claiming…" : "Claim Credential"}
+                        {isProcessing
+                            ? (action === "unclaim" ? "Removing…" : "Claiming…")
+                            : (isVerified ? "Unclaim Credential" : "Claim Credential")
+                        }
                     </Button>
                     <Link
                         href="/credentials"

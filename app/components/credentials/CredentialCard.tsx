@@ -27,7 +27,7 @@ export function CredentialCard({ title, issuer, credentialId, status = "collect"
     const Tag = isClickable ? "button" : "div";
 
     const handleCollect = () => {
-        if (!credentialId || isVerified) return;
+        if (!credentialId) return;
         router.push(`/credentials/verify/${credentialId}`);
     };
 
@@ -64,9 +64,8 @@ export function CredentialCard({ title, issuer, credentialId, status = "collect"
                     <Button
                         variant="primary"
                         size="sm"
-                        disabled={isVerified}
-                        onClick={isVerified ? undefined : handleCollect}
-                        className={`shrink-0 rounded-md! border-none! px-3! py-2! shadow-none! text-sm! font-medium! disabled:opacity-100! disabled:cursor-default! ${isVerified ? "cursor-default bg-lavender! text-primary!" : "bg-primary! text-white!"}`}
+                        onClick={handleCollect}
+                        className={`shrink-0 rounded-md! border-none! px-3! py-2! shadow-none! text-sm! font-medium! ${isVerified ? "bg-lavender! text-primary!" : "bg-primary! text-white!"}`}
                     >
                         {isVerified ? "Verified" : "Collect"}
                     </Button>
