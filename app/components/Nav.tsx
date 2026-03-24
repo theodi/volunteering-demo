@@ -44,13 +44,6 @@ export function Nav() {
           <SolidLogo className="h-10 w-10 shrink-0 sm:h-11 sm:w-11" />
         </Link>
 
-        {/* NVS Portal link */}
-        <Link
-          href="/national-volunteer-services"
-          className="rounded-lg px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-cosmos"
-        >
-          NVS Portal
-        </Link>
 
         {/* Right: user + help */}
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
