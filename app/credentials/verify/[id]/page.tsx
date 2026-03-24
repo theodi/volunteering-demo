@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { CheckCircleIcon, ShieldCheckIcon } from "@heroicons/react/24/solid";
 import { Button } from "@/app/components/Button";
 import { NVSNavbar } from "@/app/components/nvs/NVSNavbar";
 import { NVSFooter } from "@/app/components/nvs/NVSFooter";
+import { LoadingScreen } from "@/app/components/LoadingScreen";
+import { useCredentials } from "@/app/lib/hooks/useCredentials";
 import Link from "next/link";
 
 const VERIFICATION_STEPS = [
@@ -19,19 +22,28 @@ export default function VerifyCredentialPage() {
     const router = useRouter();
     const credentialId = params.id as string;
 
-    // Read credential info from sessionStorage
-    const stored = typeof window !== "undefined"
-        ? sessionStorage.getItem(`credential-verify-${credentialId}`)
-        : null;
-    const credentialInfo = stored ? JSON.parse(stored) as { title: string; issuer: string } : null;
-    const title = credentialInfo?.title ?? "UK DBS Check";
-    const issuer = credentialInfo?.issuer ?? "Disclosure and Barring Service GOV.UK";
+    const { credentials, isLoading, updateStatus } = useCredentials();
+    const [isClaiming, setIsClaiming] = useState(false);
 
-    const handleClaim = () => {
-        // Mark as verified in sessionStorage so the credentials page can read it
-        sessionStorage.setItem(`credential-verified-${credentialId}`, "true");
-        router.push("/credentials");
+    // Find the credential from the Pod data
+    const credential = credentials.find((c) => c.id === credentialId);
+    const title = credential?.title ?? "UK DBS Check";
+    const issuer = credential?.issuer ?? "Disclosure and Barring Service GOV.UK";
+
+    const handleClaim = async () => {
+        setIsClaiming(true);
+        try {
+            await updateStatus(credentialId, "verified");
+            router.push("/credentials");
+        } catch (err) {
+            console.error("Failed to claim credential:", err);
+            setIsClaiming(false);
+        }
     };
+
+    if (isLoading) {
+        return <LoadingScreen />;
+    }
 
     return (
         <div className="flex min-h-screen flex-col bg-white font-sora">
@@ -131,9 +143,10 @@ export default function VerifyCredentialPage() {
                         variant="primary"
                         size="lg"
                         onClick={handleClaim}
+                        disabled={isClaiming}
                         className="rounded-none!"
                     >
-                        Claim Credential
+                        {isClaiming ? "Claiming…" : "Claim Credential"}
                     </Button>
                     <Link
                         href="/credentials"

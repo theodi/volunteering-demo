@@ -1,6 +1,8 @@
 /**
- * Volunteer extended profile: read/write skills, causes, equipment, and locations
- * in the volunteer profile document at {pod}/volunteer/profile.ttl.
+ * Volunteer extended profile: read/write skills, causes, equipment, locations,
+ * availability, and credentials in the volunteer profile document at
+ * {pod}/volunteer/profile.ttl.
+ *
  * Uses rdfjs-wrapper VolunteerProfile for clean RDF access; N3 for serialization.
  *
  * All functions are pure async — caching and dedup are handled by React Query
@@ -8,11 +10,13 @@
  */
 
 import { Parser, Writer, Store, DataFactory } from "n3";
+import type { BlankNode } from "n3";
 import { wrapVolunteerProfile } from "@/app/lib/class/VolunteerProfile";
 import { VP, GEO, RDFS, VOLUNTEERING_NS } from "@/app/lib/class/Vocabulary";
 import type { SavedLocation } from "@/app/components/volunteer-info/PreferredLocations";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+const XSD_DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
 
 /** Constructs the volunteer profile doc URL and subject IRI from the pod root. */
 function volunteerProfileDoc(podRoot: string): { docUrl: string; subjectIri: string } {
@@ -40,6 +44,7 @@ function serializeToTurtle(store: Store): Promise<string> {
       volunteering: "https://ns.volunteeringdata.io/",
       rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+      xsd: "http://www.w3.org/2001/XMLSchema#",
       geo: "http://www.w3.org/2003/01/geo/wgs84_pos#",
     },
   });
@@ -385,4 +390,261 @@ export async function writeTimesToPod(
   slots: Set<string>,
 ): Promise<void> {
   await writePropertyToPod(fetchFn, podRoot, "preferredTimes", slotsToTimeIris(slots));
+}
+
+// ---------------------------------------------------------------------------
+// Public API — credentials (blank nodes, same pattern as locations)
+// ---------------------------------------------------------------------------
+
+/** Credential-specific VP predicates. */
+const VP_CRED = {
+  hasCredential: "https://id.volunteeringdata.io/volunteer-profile/hasCredential",
+  Credential: "https://id.volunteeringdata.io/volunteer-profile/Credential",
+  credentialType: "https://id.volunteeringdata.io/volunteer-profile/credentialType",
+  credentialIssuer: "https://id.volunteeringdata.io/volunteer-profile/credentialIssuer",
+  credentialStatus: "https://id.volunteeringdata.io/volunteer-profile/credentialStatus",
+  credentialTitle: "https://id.volunteeringdata.io/volunteer-profile/credentialTitle",
+  credentialIssuedAt: "https://id.volunteeringdata.io/volunteer-profile/credentialIssuedAt",
+} as const;
+
+export type CredentialStatus = "collect" | "verified";
+
+export type PodCredential = {
+  /** Unique ID, e.g. "dbs-check-1711234567890" */
+  id: string;
+  /** Display title, e.g. "UK DBS Check" */
+  title: string;
+  /** Display issuer, e.g. "Disclosure and Barring Service GOV.UK" */
+  issuer: string;
+  /** Volunteering ontology requirement IRI, e.g. "https://ns.volunteeringdata.io/DBSCheck" */
+  requirementUri: string;
+  /** Issuer IRI, e.g. "https://www.gov.uk/government/organisations/disclosure-and-barring-service" */
+  issuerUri: string;
+  /** Current status */
+  status: CredentialStatus;
+  /** ISO date string when credential was issued/collected */
+  validFrom: string;
+};
+
+/**
+ * Reads all credentials from {pod}/volunteer/profile.ttl.
+ *
+ * Each credential is a blank node off <#me>:
+ *   <#me> vp:hasCredential _:cred .
+ *   _:cred a vp:Credential ;
+ *       vp:credentialType volunteering:DBSCheck ;
+ *       vp:credentialIssuer <https://www.gov.uk/...> ;
+ *       vp:credentialTitle "UK DBS Check" ;
+ *       vp:credentialStatus "collect" ;
+ *       vp:credentialIssuedAt "2026-03-24T11:09:42Z"^^xsd:dateTime ;
+ *       rdfs:label "Disclosure and Barring Service GOV.UK" .
+ */
+export async function readCredentialsFromPod(
+  fetchFn: typeof fetch,
+  podRoot: string,
+): Promise<PodCredential[]> {
+  const { docUrl, subjectIri } = volunteerProfileDoc(podRoot);
+
+  let response: Response;
+  try {
+    response = await fetchFn(docUrl, {
+      method: "GET",
+      headers: { Accept: "text/turtle, application/turtle" },
+    });
+  } catch {
+    return [];
+  }
+
+  if (!response.ok) {
+    if (response.status === 404) return [];
+    throw new Error(`Failed to read credentials: ${response.status}`);
+  }
+
+  const text = await response.text();
+  if (!text.trim()) return [];
+
+  const store = parseTurtle(text, docUrl);
+  if (!store) return [];
+
+  const subjectNode = DataFactory.namedNode(subjectIri);
+  const hasCredPred = DataFactory.namedNode(VP_CRED.hasCredential);
+  const credQuads = store.getQuads(subjectNode, hasCredPred, null, null);
+  const credentials: PodCredential[] = [];
+
+  for (const quad of credQuads) {
+    const credNode = quad.object;
+
+    const titleQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.credentialTitle), null, null);
+    const title = titleQuads.length > 0 ? titleQuads[0].object.value : "";
+
+    const typeQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.credentialType), null, null);
+    const requirementUri = typeQuads.length > 0 ? typeQuads[0].object.value : "";
+
+    const issuedAtQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.credentialIssuedAt), null, null);
+    const validFrom = issuedAtQuads.length > 0 ? issuedAtQuads[0].object.value : "";
+
+    const issuerQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.credentialIssuer), null, null);
+    const issuerUri = issuerQuads.length > 0 ? issuerQuads[0].object.value : "";
+
+    const labelQuads = store.getQuads(credNode, DataFactory.namedNode(RDFS.label), null, null);
+    const issuerLabel = labelQuads.length > 0 ? labelQuads[0].object.value : issuerUri;
+
+    const statusQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.credentialStatus), null, null);
+    const status: CredentialStatus =
+      statusQuads.length > 0 && statusQuads[0].object.value === "verified"
+        ? "verified"
+        : "collect";
+
+    // Build a stable ID from the requirement fragment + timestamp
+    const fragment = requirementUri.replace(VOLUNTEERING_NS, "").toLowerCase().replace(/([A-Z])/g, "-$1").replace(/^-/, "");
+    const ts = validFrom ? new Date(validFrom).getTime() : Date.now();
+    const id = `${fragment}-${ts}`;
+
+    credentials.push({ id, title, issuer: issuerLabel, requirementUri, issuerUri, status, validFrom });
+  }
+
+  return credentials;
+}
+
+/**
+ * Writes a credential to {pod}/volunteer/profile.ttl as a blank node off <#me>.
+ * If a credential with the same requirementUri + validFrom already exists, it
+ * is replaced. Otherwise it is appended — preserving all other profile data.
+ */
+export async function writeCredentialToPod(
+  fetchFn: typeof fetch,
+  podRoot: string,
+  credential: PodCredential,
+): Promise<void> {
+  const { docUrl, subjectIri } = volunteerProfileDoc(podRoot);
+
+  const store = new Store();
+  try {
+    const getRes = await fetchFn(docUrl, { method: "GET", headers: { Accept: "text/turtle" } });
+    if (getRes.ok) {
+      const text = await getRes.text();
+      if (text.trim()) {
+        const existing = parseTurtle(text, docUrl);
+        if (existing) {
+          for (const q of existing.getQuads(null, null, null, null)) store.addQuad(q);
+        }
+      }
+    }
+  } catch {
+    // Document doesn't exist yet — will be created
+  }
+
+  const subjectNode = DataFactory.namedNode(subjectIri);
+  const rdfType = DataFactory.namedNode(RDF_TYPE);
+  if (store.getQuads(subjectNode, rdfType, null, null).length === 0) {
+    store.addQuad(subjectNode, rdfType, DataFactory.namedNode(VP.VolunteerProfile));
+  }
+
+  // Remove existing credential that matches (by requirementUri + validFrom)
+  removeMatchingCredential(store, subjectNode, credential.requirementUri, credential.validFrom);
+
+  // Add the credential blank node
+  const credBNode = DataFactory.blankNode();
+  store.addQuad(subjectNode, DataFactory.namedNode(VP_CRED.hasCredential), credBNode);
+  store.addQuad(credBNode, rdfType, DataFactory.namedNode(VP_CRED.Credential));
+  store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.credentialTitle), DataFactory.literal(credential.title));
+  store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.credentialType), DataFactory.namedNode(credential.requirementUri));
+  store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.credentialIssuer), DataFactory.namedNode(credential.issuerUri));
+  store.addQuad(credBNode, DataFactory.namedNode(RDFS.label), DataFactory.literal(credential.issuer));
+  store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.credentialStatus), DataFactory.literal(credential.status));
+  store.addQuad(
+    credBNode,
+    DataFactory.namedNode(VP_CRED.credentialIssuedAt),
+    DataFactory.literal(credential.validFrom, DataFactory.namedNode(XSD_DATETIME)),
+  );
+
+  const turtle = await serializeToTurtle(store);
+  const putResponse = await fetchFn(docUrl, {
+    method: "PUT",
+    headers: { "Content-Type": "text/turtle" },
+    body: turtle,
+  });
+  if (!putResponse.ok) throw new Error(`Failed to write credential: ${putResponse.status}`);
+}
+
+/**
+ * Updates the status of an existing credential in the Pod.
+ * Finds the matching blank node by timestamp (from the credential ID),
+ * swaps the status literal, and PUTs back.
+ */
+export async function updateCredentialStatusInPod(
+  fetchFn: typeof fetch,
+  podRoot: string,
+  credentialId: string,
+  newStatus: CredentialStatus,
+): Promise<void> {
+  const { docUrl, subjectIri } = volunteerProfileDoc(podRoot);
+
+  const getRes = await fetchFn(docUrl, { method: "GET", headers: { Accept: "text/turtle" } });
+  if (!getRes.ok) throw new Error(`Failed to read profile for status update: ${getRes.status}`);
+
+  const text = await getRes.text();
+  const store = parseTurtle(text, docUrl);
+  if (!store) throw new Error("Failed to parse volunteer profile document");
+
+  const subjectNode = DataFactory.namedNode(subjectIri);
+  const hasCredPred = DataFactory.namedNode(VP_CRED.hasCredential);
+  const statusPred = DataFactory.namedNode(VP_CRED.credentialStatus);
+  const issuedAtPred = DataFactory.namedNode(VP_CRED.credentialIssuedAt);
+
+  const tsMatch = credentialId.match(/-(\d+)$/);
+  const targetTs = tsMatch ? parseInt(tsMatch[1], 10) : null;
+
+  let found = false;
+  for (const quad of store.getQuads(subjectNode, hasCredPred, null, null)) {
+    const credNode = quad.object as BlankNode;
+
+    const issuedAtQuads = store.getQuads(credNode, issuedAtPred, null, null);
+    if (issuedAtQuads.length > 0 && targetTs) {
+      const nodeTs = new Date(issuedAtQuads[0].object.value).getTime();
+      if (nodeTs !== targetTs) continue;
+    }
+
+    for (const sq of store.getQuads(credNode, statusPred, null, null)) store.removeQuad(sq);
+    store.addQuad(credNode, statusPred, DataFactory.literal(newStatus));
+    found = true;
+    break;
+  }
+
+  if (!found) throw new Error(`Credential not found in profile: ${credentialId}`);
+
+  const turtle = await serializeToTurtle(store);
+  const putResponse = await fetchFn(docUrl, {
+    method: "PUT",
+    headers: { "Content-Type": "text/turtle" },
+    body: turtle,
+  });
+  if (!putResponse.ok) throw new Error(`Failed to update credential status: ${putResponse.status}`);
+}
+
+/** Removes a credential blank node that matches requirementUri + validFrom. */
+function removeMatchingCredential(
+  store: Store,
+  subjectNode: ReturnType<typeof DataFactory.namedNode>,
+  requirementUri: string,
+  validFrom: string,
+): void {
+  const hasCredPred = DataFactory.namedNode(VP_CRED.hasCredential);
+  const typePred = DataFactory.namedNode(VP_CRED.credentialType);
+  const issuedAtPred = DataFactory.namedNode(VP_CRED.credentialIssuedAt);
+
+  for (const quad of store.getQuads(subjectNode, hasCredPred, null, null)) {
+    const credNode = quad.object;
+    const typeQuads = store.getQuads(credNode, typePred, null, null);
+    const issuedAtQuads = store.getQuads(credNode, issuedAtPred, null, null);
+
+    if (
+      typeQuads.length > 0 && typeQuads[0].object.value === requirementUri &&
+      issuedAtQuads.length > 0 && issuedAtQuads[0].object.value === validFrom
+    ) {
+      for (const prop of store.getQuads(credNode, null, null, null)) store.removeQuad(prop);
+      store.removeQuad(quad);
+      break;
+    }
+  }
 }

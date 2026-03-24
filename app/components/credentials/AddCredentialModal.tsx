@@ -8,6 +8,10 @@ export type CredentialType = {
     id: string;
     title: string;
     issuer: string;
+    /** Volunteering ontology requirement IRI (e.g. https://ns.volunteeringdata.io/DBSCheck) */
+    requirementUri: string;
+    /** Issuer IRI (e.g. https://www.gov.uk/dbs) */
+    issuerUri: string;
     icon?: string;
 };
 
@@ -16,11 +20,15 @@ const AVAILABLE_CREDENTIALS: CredentialType[] = [
         id: "dbs-check",
         title: "UK DBS Check",
         issuer: "Disclosure and Barring Service GOV.UK",
+        requirementUri: "https://ns.volunteeringdata.io/DBSCheck",
+        issuerUri: "https://www.gov.uk/government/organisations/disclosure-and-barring-service",
     },
     {
         id: "first-aid",
         title: "First Aid Certificate",
         issuer: "First Aid Service GOV.UK",
+        requirementUri: "https://ns.volunteeringdata.io/FirstAidCertificate",
+        issuerUri: "https://www.gov.uk/government/organisations/first-aid-service",
     },
 ];
 

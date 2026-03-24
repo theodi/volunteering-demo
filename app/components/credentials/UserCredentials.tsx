@@ -1,76 +1,40 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { PlusIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { CredentialCard } from "./CredentialCard";
-import type { CredentialStatus } from "./CredentialCard";
 import { AddCredentialModal } from "./AddCredentialModal";
 import type { CredentialType } from "./AddCredentialModal";
 import { HeroText } from "../HeroText";
 import { Button } from "../Button";
 import { EmptyState } from "../profile/EmptyState";
-
-type CredentialItem = {
-    id: string;
-    title: string;
-    issuer: string;
-    status: CredentialStatus;
-};
-
-const STORAGE_KEY = "user-credentials";
-
-function loadCredentials(): CredentialItem[] {
-    if (typeof window === "undefined") return [];
-    const stored = sessionStorage.getItem(STORAGE_KEY);
-    if (!stored) return [];
-    try { return JSON.parse(stored); } catch { return []; }
-}
-
-function saveCredentials(items: CredentialItem[]) {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-}
+import { useCredentials } from "@/app/lib/hooks/useCredentials";
+import type { PodCredential } from "@/app/lib/hooks/useCredentials";
+import { LoadingScreen } from "../LoadingScreen";
 
 export function UserCredentials() {
-    const [credentials, setCredentials] = useState<CredentialItem[]>([]);
+    const { credentials, isLoading, addCredential } = useCredentials();
     const [modalOpen, setModalOpen] = useState(false);
 
-    // Load credentials from sessionStorage on mount
-    useEffect(() => {
-        const saved = loadCredentials();
-
-        // Check if any credentials were just verified (returning from verify page)
-        const updated = saved.map((cred) => {
-            const verifiedFlag = sessionStorage.getItem(`credential-verified-${cred.id}`);
-            if (verifiedFlag === "true" && cred.status !== "verified") {
-                sessionStorage.removeItem(`credential-verified-${cred.id}`);
-                return { ...cred, status: "verified" as CredentialStatus };
-            }
-            return cred;
-        });
-
-        setCredentials(updated);
-        saveCredentials(updated);
-    }, []);
-
-    const updateCredentials = useCallback((updater: (prev: CredentialItem[]) => CredentialItem[]) => {
-        setCredentials((prev) => {
-            const next = updater(prev);
-            saveCredentials(next);
-            return next;
-        });
-    }, []);
-
-    const handleAddCredential = (cred: CredentialType) => {
-        const newItem: CredentialItem = {
+    const handleAddCredential = async (cred: CredentialType) => {
+        const newCredential: PodCredential = {
             id: `${cred.id}-${Date.now()}`,
             title: cred.title,
             issuer: cred.issuer,
+            requirementUri: cred.requirementUri,
+            issuerUri: cred.issuerUri,
             status: "collect",
+            validFrom: new Date().toISOString(),
         };
-        updateCredentials((prev) => [...prev, newItem]);
+        await addCredential(newCredential);
     };
 
+    // Extract base IDs (without timestamp suffix) for highlighting already-added types
     const existingIds = new Set(credentials.map((c) => c.id.replace(/-\d+$/, "")));
+
+    if (isLoading) {
+        return <LoadingScreen />;
+    }
 
     return (
         <>

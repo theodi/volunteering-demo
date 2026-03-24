@@ -28,8 +28,6 @@ export function CredentialCard({ title, issuer, credentialId, status = "collect"
 
     const handleCollect = () => {
         if (!credentialId || isVerified) return;
-        // Store credential info for the verify page to read
-        sessionStorage.setItem(`credential-verify-${credentialId}`, JSON.stringify({ title, issuer }));
         router.push(`/credentials/verify/${credentialId}`);
     };
 
