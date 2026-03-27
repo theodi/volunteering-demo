@@ -6,8 +6,8 @@ import { VolunteerOntologyProvider } from "@/app/contexts/VolunteerOntologyConte
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Vounteering Demo",
-  description: "Solid-powered volunteering demo",
+  title: "Solid Profile Manager",
+  description: "Solid-powered Profile Manager",
 };
 
 export default function RootLayout({

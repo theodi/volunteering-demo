@@ -17,7 +17,7 @@ export default function LoginPage() {
       redirectUrl={redirectUrl}
       onAlreadyLoggedIn={() => router.replace("/")}
       title="Sign in"
-      subtitle="to continue to Vounteering Demo"
+      subtitle="to continue to the Profile Manager"
     />
   );
 }
