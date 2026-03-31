@@ -107,132 +107,73 @@ vp:YouthChildren a skos:Concept ; skos:prefLabel "Youth & children"@en .
 
 
 # =============================================================================
-# Requirements / Equipment & Resources (by category)
+# Requirements taxonomy aligned to Volunteering Data Standard
+# Source: https://standard.volunteeringdata.io/ontology/requirement
 # =============================================================================
 
 # Categories
-vp:PhysicalAndPersonal a skos:Concept ;
-    skos:prefLabel "Physical & Personal"@en .
+vp:AssetsEquipment a skos:Concept ;
+    skos:prefLabel "Assets & equipment"@en .
 
-vp:Clothing a skos:Concept ;
-    skos:prefLabel "Clothing"@en .
+vp:CommunityEnvironmentKnowledge a skos:Concept ;
+    skos:prefLabel "Community & environment knowledge"@en .
 
-vp:Equipment a skos:Concept ;
-    skos:prefLabel "Equipment"@en .
+vp:Legal a skos:Concept ;
+    skos:prefLabel "Legal"@en .
 
-vp:Vehicles a skos:Concept ;
-    skos:prefLabel "Vehicles"@en .
+vp:PhysicalPracticalReadiness a skos:Concept ;
+    skos:prefLabel "Physical & practical readiness"@en .
 
-vp:Facilities a skos:Concept ;
-    skos:prefLabel "Facilities"@en .
-
-# Concept scheme: defines which categories are "equipment/requirements" (single source of truth)
+# Concept scheme: defines which categories are "requirements" (single source of truth)
 vp:EquipmentRequirements a skos:ConceptScheme ;
-    skos:hasTopConcept vp:PhysicalAndPersonal ;
-    skos:hasTopConcept vp:Clothing ;
-    skos:hasTopConcept vp:Equipment ;
-    skos:hasTopConcept vp:Vehicles ;
-    skos:hasTopConcept vp:Facilities .
+    skos:hasTopConcept vp:AssetsEquipment ;
+    skos:hasTopConcept vp:CommunityEnvironmentKnowledge ;
+    skos:hasTopConcept vp:Legal ;
+    skos:hasTopConcept vp:PhysicalPracticalReadiness .
 
-# Physical & Personal
-vp:PhysicalStamina a skos:Concept ;
-    skos:prefLabel "Physical Stamina"@en ;
-    skos:broader vp:PhysicalAndPersonal .
-vp:AbilityToWorkOutdoors a skos:Concept ;
-    skos:prefLabel "Ability to Work Outdoors"@en ;
-    skos:broader vp:PhysicalAndPersonal .
-vp:PersonalPreparedness a skos:Concept ;
-    skos:prefLabel "Personal Preparedness"@en ;
-    skos:broader vp:PhysicalAndPersonal .
+# Assets & equipment
+vp:PersonalEquipment a skos:Concept ; skos:prefLabel "Personal Equipment"@en ; skos:broader vp:AssetsEquipment .
+vp:SturdyFootwear a skos:Concept ; skos:prefLabel "Sturdy footwear (e.g., boots)"@en ; skos:broader vp:AssetsEquipment .
+vp:WaterproofsAndWarmLayers a skos:Concept ; skos:prefLabel "Waterproofs and warm layers"@en ; skos:broader vp:AssetsEquipment .
+vp:Gloves a skos:Concept ; skos:prefLabel "Gloves (work gloves, waterproof gloves)"@en ; skos:broader vp:AssetsEquipment .
+vp:HighVisibilityVest a skos:Concept ; skos:prefLabel "High-visibility vest"@en ; skos:broader vp:AssetsEquipment .
+vp:HeadtorchOrFlashlight a skos:Concept ; skos:prefLabel "Headtorch or flashlight"@en ; skos:broader vp:AssetsEquipment .
+vp:PhoneAndPowerBank a skos:Concept ; skos:prefLabel "Phone + power bank"@en ; skos:broader vp:AssetsEquipment .
+vp:SmallPersonalFirstAidKit a skos:Concept ; skos:prefLabel "Small personal first aid kit"@en ; skos:broader vp:AssetsEquipment .
+vp:WaterBottle a skos:Concept ; skos:prefLabel "Water bottle"@en ; skos:broader vp:AssetsEquipment .
+vp:FourByFourVehicle a skos:Concept ; skos:prefLabel "4x4 vehicle (personal or organisational)"@en ; skos:broader vp:AssetsEquipment .
+vp:SUVOrOffRoadVehicle a skos:Concept ; skos:prefLabel "SUV or off-road capable vehicle"@en ; skos:broader vp:AssetsEquipment .
+vp:VehicleWithTowCapability a skos:Concept ; skos:prefLabel "Vehicle with tow capability"@en ; skos:broader vp:AssetsEquipment .
+vp:AccessToVanOrPeopleCarrier a skos:Concept ; skos:prefLabel "Access to a van or people-carrier"@en ; skos:broader vp:AssetsEquipment .
+vp:AbilityToTransportEquipmentOrSupplies a skos:Concept ; skos:prefLabel "Ability to transport equipment or supplies"@en ; skos:broader vp:AssetsEquipment .
+vp:AccessToBicyclesOrCargoBikes a skos:Concept ; skos:prefLabel "Access to bicycles or cargo bikes (urban crises)"@en ; skos:broader vp:AssetsEquipment .
+vp:Boat a skos:Concept ; skos:prefLabel "Boat"@en ; skos:broader vp:AssetsEquipment .
+vp:Hovercraft a skos:Concept ; skos:prefLabel "Hovercraft"@en ; skos:broader vp:AssetsEquipment .
+vp:WalkieTalkiesOrRadios a skos:Concept ; skos:prefLabel "Walkie-talkies or radios"@en ; skos:broader vp:AssetsEquipment .
+vp:PortableGeneratorOrPowerStation a skos:Concept ; skos:prefLabel "Portable generator or power station"@en ; skos:broader vp:AssetsEquipment .
+vp:WaterPump a skos:Concept ; skos:prefLabel "Water pump (for localised flooding help)"@en ; skos:broader vp:AssetsEquipment .
+vp:Tools a skos:Concept ; skos:prefLabel "Tools (shovel, rake, chainsaw, basic toolkit)"@en ; skos:broader vp:AssetsEquipment .
+vp:PortableShelterOrGazebo a skos:Concept ; skos:prefLabel "Portable shelter/gazebo"@en ; skos:broader vp:AssetsEquipment .
+vp:ThermalBlankets a skos:Concept ; skos:prefLabel "Thermal blankets"@en ; skos:broader vp:AssetsEquipment .
+vp:PPE a skos:Concept ; skos:prefLabel "PPE such as masks, goggles, or waterproof gloves"@en ; skos:broader vp:AssetsEquipment .
+vp:MapsOrWaterproofMapCases a skos:Concept ; skos:prefLabel "Maps / waterproof map cases"@en ; skos:broader vp:AssetsEquipment .
+vp:LifeJacket a skos:Concept ; skos:prefLabel "Life jacket (for trained flood volunteers)"@en ; skos:broader vp:AssetsEquipment .
+vp:Venue a skos:Concept ; skos:prefLabel "Venue"@en ; skos:broader vp:AssetsEquipment .
+vp:Kitchen a skos:Concept ; skos:prefLabel "Kitchen"@en ; skos:broader vp:AssetsEquipment .
 
-# Clothing
-vp:SturdyFootwear a skos:Concept ;
-    skos:prefLabel "Sturdy Footwear"@en ;
-    skos:broader vp:Clothing .
-vp:WaterproofsAndWarmLayers a skos:Concept ;
-    skos:prefLabel "Waterproofs and Warm Layers"@en ;
-    skos:broader vp:Clothing .
-vp:Gloves a skos:Concept ;
-    skos:prefLabel "Gloves"@en ;
-    skos:broader vp:Clothing .
-vp:HighVisibilityVest a skos:Concept ;
-    skos:prefLabel "High-Visibility Vest"@en ;
-    skos:broader vp:Clothing .
+# Community & environment knowledge
+vp:KnowledgeOfLocalRoadsFacilitiesResources a skos:Concept ; skos:prefLabel "Knowledge of local roads, facilities, and resources"@en ; skos:broader vp:CommunityEnvironmentKnowledge .
+vp:UnderstandingDiverseNeedsWithinCommunity a skos:Concept ; skos:prefLabel "Understanding diverse needs within the community"@en ; skos:broader vp:CommunityEnvironmentKnowledge .
+vp:AwarenessOfLocalSupportServices a skos:Concept ; skos:prefLabel "Awareness of local support services"@en ; skos:broader vp:CommunityEnvironmentKnowledge .
 
-# Equipment
-vp:HeadtorchOrFlashlight a skos:Concept ;
-    skos:prefLabel "Headtorch or Flashlight"@en ;
-    skos:broader vp:Equipment .
-vp:PhoneAndPowerBank a skos:Concept ;
-    skos:prefLabel "Phone and Power Bank"@en ;
-    skos:broader vp:Equipment .
-vp:SmallPersonalFirstAidKit a skos:Concept ;
-    skos:prefLabel "Small Personal First Aid Kit"@en ;
-    skos:broader vp:Equipment .
-vp:WaterBottle a skos:Concept ;
-    skos:prefLabel "Water Bottle"@en ;
-    skos:broader vp:Equipment .
-vp:WalkieTalkiesOrRadios a skos:Concept ;
-    skos:prefLabel "Walkie-Talkies or Radios"@en ;
-    skos:broader vp:Equipment .
-vp:PortableGeneratorOrPowerStation a skos:Concept ;
-    skos:prefLabel "Portable Generator or Power Station"@en ;
-    skos:broader vp:Equipment .
-vp:WaterPump a skos:Concept ;
-    skos:prefLabel "Water Pump"@en ;
-    skos:broader vp:Equipment .
-vp:Tools a skos:Concept ;
-    skos:prefLabel "Tools"@en ;
-    skos:broader vp:Equipment .
-vp:PortableShelterOrGazebo a skos:Concept ;
-    skos:prefLabel "Portable Shelter or Gazebo"@en ;
-    skos:broader vp:Equipment .
-vp:ThermalBlankets a skos:Concept ;
-    skos:prefLabel "Thermal Blankets"@en ;
-    skos:broader vp:Equipment .
-vp:PPE a skos:Concept ;
-    skos:prefLabel "PPE (Personal Protective Equipment)"@en ;
-    skos:broader vp:Equipment .
-vp:MapsOrWaterproofMapCases a skos:Concept ;
-    skos:prefLabel "Maps or Waterproof Map Cases"@en ;
-    skos:broader vp:Equipment .
-vp:LifeJacket a skos:Concept ;
-    skos:prefLabel "Life Jacket"@en ;
-    skos:broader vp:Equipment .
+# Legal
+vp:IDCheck a skos:Concept ; skos:prefLabel "ID Check"@en ; skos:broader vp:Legal .
+vp:DBSCheck a skos:Concept ; skos:prefLabel "DBS Check"@en ; skos:broader vp:Legal .
 
-# Vehicles
-vp:FourByFourVehicle a skos:Concept ;
-    skos:prefLabel "4x4 Vehicle"@en ;
-    skos:broader vp:Vehicles .
-vp:SUVOrOffRoadVehicle a skos:Concept ;
-    skos:prefLabel "SUV or Off-road Vehicle"@en ;
-    skos:broader vp:Vehicles .
-vp:VehicleWithTowCapability a skos:Concept ;
-    skos:prefLabel "Vehicle with Tow Capability"@en ;
-    skos:broader vp:Vehicles .
-vp:AccessToVanOrPeopleCarrier a skos:Concept ;
-    skos:prefLabel "Access to Van or People Carrier"@en ;
-    skos:broader vp:Vehicles .
-vp:AbilityToTransportEquipmentOrSupplies a skos:Concept ;
-    skos:prefLabel "Ability to Transport Equipment or Supplies"@en ;
-    skos:broader vp:Vehicles .
-vp:AccessToBicyclesOrCargoBikes a skos:Concept ;
-    skos:prefLabel "Access to Bicycles or Cargo Bikes"@en ;
-    skos:broader vp:Vehicles .
-vp:Boat a skos:Concept ;
-    skos:prefLabel "Boat"@en ;
-    skos:broader vp:Vehicles .
-vp:Hovercraft a skos:Concept ;
-    skos:prefLabel "Hovercraft"@en ;
-    skos:broader vp:Vehicles .
-
-# Facilities
-vp:Venue a skos:Concept ;
-    skos:prefLabel "Venue"@en ;
-    skos:broader vp:Facilities .
-vp:Kitchen a skos:Concept ;
-    skos:prefLabel "Kitchen"@en ;
-    skos:broader vp:Facilities .
+# Physical & practical readiness
+vp:PhysicalStamina a skos:Concept ; skos:prefLabel "Physical stamina for standing, walking, carrying"@en ; skos:broader vp:PhysicalPracticalReadiness .
+vp:AbilityToWorkOutdoors a skos:Concept ; skos:prefLabel "Ability to work outdoors in varied conditions"@en ; skos:broader vp:PhysicalPracticalReadiness .
+vp:PersonalPreparedness a skos:Concept ; skos:prefLabel "Personal preparedness (water, snacks, medication)"@en ; skos:broader vp:PhysicalPracticalReadiness .
 
 
 # =============================================================================

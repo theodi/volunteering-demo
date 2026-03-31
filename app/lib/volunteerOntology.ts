@@ -150,6 +150,7 @@ export function parseVolunteerEquipmentTtl(turtleText: string): VolunteerEquipme
   const { store, dataset } = parseTurtle(turtleText);
   const categoryOrder = getCategoryLabelsFromScheme(store, dataset, EQUIPMENT_SCHEME_IRI);
   const equipmentCategoryLabels = new Set(categoryOrder);
+  const seenEquipmentIris = new Set<string>();
 
   const categories: EquipmentCategories = {};
   const equipmentIriToLabel: Record<string, string> = {};
@@ -162,6 +163,8 @@ export function parseVolunteerEquipmentTtl(turtleText: string): VolunteerEquipme
     if (!label || !catLabel) continue;
     if (!equipmentCategoryLabels.has(catLabel)) continue;
     const iri = concept.value;
+    if (seenEquipmentIris.has(iri)) continue;
+    seenEquipmentIris.add(iri);
     categories[catLabel].push(label);
     equipmentIriToLabel[iri] = label;
     labelToEquipmentIri[label] = iri;
@@ -179,6 +182,7 @@ export function parseVolunteerSkillsTtl(turtleText: string): VolunteerSkills {
   const { store, dataset } = parseTurtle(turtleText);
   const categoryOrder = getCategoryLabelsFromScheme(store, dataset, SKILLS_SCHEME_IRI);
   const skillCategoryLabels = new Set(categoryOrder);
+  const seenSkillIris = new Set<string>();
 
   const categories: SkillCategories = {};
   const skillIriToLabel: Record<string, string> = {};
@@ -191,6 +195,8 @@ export function parseVolunteerSkillsTtl(turtleText: string): VolunteerSkills {
     if (!label || !catLabel) continue;
     if (!skillCategoryLabels.has(catLabel)) continue;
     const iri = concept.value;
+    if (seenSkillIris.has(iri)) continue;
+    seenSkillIris.add(iri);
     categories[catLabel].push(label);
     skillIriToLabel[iri] = label;
     labelToSkillIri[label] = iri;
