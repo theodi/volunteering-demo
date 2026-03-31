@@ -5,6 +5,7 @@
 
 import { readFileSync } from "fs";
 import { join } from "path";
+import { unstable_noStore as noStore } from "next/cache";
 import {
   parseVolunteerTtl,
   parseVolunteerEquipmentTtl,
@@ -21,6 +22,8 @@ export type VolunteerOntologyData = {
 };
 
 export function loadVolunteerOntology(): VolunteerOntologyData {
+  // Ensure ontology updates are reflected immediately in server-rendered UI.
+  noStore();
   const path = join(process.cwd(), "ontology", "volunteer.ttl");
   const text = readFileSync(path, "utf-8");
   return {

@@ -17,6 +17,7 @@ const BASE_IRI = "https://ns.volunteeringdata.io/";
 const CAUSES_SCHEME_IRI = `${BASE_IRI}CausesScheme`;
 const EQUIPMENT_SCHEME_IRI = `${BASE_IRI}EquipmentRequirements`;
 const SKILLS_SCHEME_IRI = `${BASE_IRI}SkillsScheme`;
+const CAUSES_CATEGORY_NAME = "Causes";
 
 // —— Causes ——
 
@@ -117,29 +118,27 @@ function getCategoryLabelsFromScheme(
 
 /**
  * Parses Turtle and returns cause categories and labels.
- * Only includes concepts whose category is in the vp:CausesScheme scheme.
+ * Uses vp:CausesScheme top concepts as the source of truth.
  */
 export function parseVolunteerTtl(turtleText: string): VolunteerCauses {
   const { store, dataset } = parseTurtle(turtleText);
-  const categoryOrder = getCategoryLabelsFromScheme(store, dataset, CAUSES_SCHEME_IRI);
-  const causeCategoryLabels = new Set(categoryOrder);
-  const categories: CauseCategories = {};
+  const categories: CauseCategories = { [CAUSES_CATEGORY_NAME]: [] };
   const causeIriToLabel: Record<string, string> = {};
   const labelToCauseIri: Record<string, string> = {};
-  for (const cat of categoryOrder) categories[cat] = [];
-
-  for (const concept of dataset.conceptsWithBroader) {
+  const scheme = DataFactory.namedNode(CAUSES_SCHEME_IRI);
+  const hasTopConcept = DataFactory.namedNode(SKOS.hasTopConcept);
+  const quads = store.getQuads(scheme, hasTopConcept, null, null);
+  for (const q of quads) {
+    if (q.object.termType !== "NamedNode") continue;
+    const concept = new SkosConcept(q.object, dataset, DataFactory);
     const label = concept.label;
-    const catLabel = concept.categoryLabel;
-    if (!label || !catLabel) continue;
-    if (!causeCategoryLabels.has(catLabel)) continue;
-    const iri = concept.value;
-    categories[catLabel].push(label);
-    causeIriToLabel[iri] = label;
-    labelToCauseIri[label] = iri;
+    if (!label) continue;
+    categories[CAUSES_CATEGORY_NAME].push(label);
+    causeIriToLabel[concept.value] = label;
+    labelToCauseIri[label] = concept.value;
   }
 
-  const allCauseLabels = categoryOrder.flatMap((cat) => categories[cat] ?? []);
+  const allCauseLabels = categories[CAUSES_CATEGORY_NAME];
   return { categories, allCauseLabels, causeIriToLabel, labelToCauseIri };
 }
 

@@ -10,136 +10,100 @@
 @prefix owl:  <http://www.w3.org/2002/07/owl#> .
 @prefix dc:   <http://purl.org/dc/terms/> .
 
-# Cause categories (top-level) and causes (narrower concepts)
-# Categories
-vp:Health a skos:Concept ;
-    skos:prefLabel "Health"@en .
-
-vp:Education a skos:Concept ;
-    skos:prefLabel "Education"@en .
-
-vp:Environment a skos:Concept ;
-    skos:prefLabel "Environment"@en .
-
-vp:Community a skos:Concept ;
-    skos:prefLabel "Community"@en .
-
-vp:ArtsAndRecreation a skos:Concept ;
-    skos:prefLabel "Arts & Recreation"@en .
-
-vp:Emergency a skos:Concept ;
-    skos:prefLabel "Emergency"@en .
-
-vp:AnimalWelfare a skos:Concept ;
-    skos:prefLabel "Animal Welfare"@en .
-
-vp:International a skos:Concept ;
-    skos:prefLabel "International"@en .
-
-# Concept scheme: defines which categories are "causes" (single source of truth)
+# Cause taxonomy aligned to the Volunteering Data Standard.
+# Source: https://standard.volunteeringdata.io/ontology/cause
 vp:CausesScheme a skos:ConceptScheme ;
-    skos:hasTopConcept vp:Health ;
-    skos:hasTopConcept vp:Education ;
-    skos:hasTopConcept vp:Environment ;
-    skos:hasTopConcept vp:Community ;
-    skos:hasTopConcept vp:ArtsAndRecreation ;
-    skos:hasTopConcept vp:Emergency ;
     skos:hasTopConcept vp:AnimalWelfare ;
-    skos:hasTopConcept vp:International .
+    skos:hasTopConcept vp:AntiPoverty ;
+    skos:hasTopConcept vp:ArtsAndCulture ;
+    skos:hasTopConcept vp:Care ;
+    skos:hasTopConcept vp:CivilRights ;
+    skos:hasTopConcept vp:Community ;
+    skos:hasTopConcept vp:CrimeSafety ;
+    skos:hasTopConcept vp:CrimeExOffenders ;
+    skos:hasTopConcept vp:DevelopmentEmergencyRelief ;
+    skos:hasTopConcept vp:Disability ;
+    skos:hasTopConcept vp:EducationLanguages ;
+    skos:hasTopConcept vp:Environment ;
+    skos:hasTopConcept vp:EthnicMinorities ;
+    skos:hasTopConcept vp:Families ;
+    skos:hasTopConcept vp:GenderSexuality ;
+    skos:hasTopConcept vp:GeneralPublic ;
+    skos:hasTopConcept vp:Health ;
+    skos:hasTopConcept vp:Heritage ;
+    skos:hasTopConcept vp:Housing ;
+    skos:hasTopConcept vp:Illness ;
+    skos:hasTopConcept vp:InCare ;
+    skos:hasTopConcept vp:LearningDisabilities ;
+    skos:hasTopConcept vp:LGBT ;
+    skos:hasTopConcept vp:LiteracyNeeds ;
+    skos:hasTopConcept vp:LocalAuthority ;
+    skos:hasTopConcept vp:LocalCommunity ;
+    skos:hasTopConcept vp:LoneParents ;
+    skos:hasTopConcept vp:LowIncomeHouseholds ;
+    skos:hasTopConcept vp:MensGroups ;
+    skos:hasTopConcept vp:MentalHealth ;
+    skos:hasTopConcept vp:OffendersAndExOffenders ;
+    skos:hasTopConcept vp:OlderPeople ;
+    skos:hasTopConcept vp:OverseasAidDevelopingWorld ;
+    skos:hasTopConcept vp:Parents ;
+    skos:hasTopConcept vp:PhysicalDisability ;
+    skos:hasTopConcept vp:RefugeesAsylumSeekers ;
+    skos:hasTopConcept vp:ReligionFaith ;
+    skos:hasTopConcept vp:ResidentsOfDisadvantagedNeighbourhoods ;
+    skos:hasTopConcept vp:SensoryImpairment ;
+    skos:hasTopConcept vp:SportOutdoorActivities ;
+    skos:hasTopConcept vp:SubstanceAbuse ;
+    skos:hasTopConcept vp:Unemployment ;
+    skos:hasTopConcept vp:VictimsOfCrime ;
+    skos:hasTopConcept vp:WomensGroups ;
+    skos:hasTopConcept vp:YouthChildren .
 
-# Health causes
-vp:MentalHealth a skos:Concept ;
-    skos:prefLabel "Mental Health"@en ;
-    skos:broader vp:Health .
-vp:PhysicalHealth a skos:Concept ;
-    skos:prefLabel "Physical Health"@en ;
-    skos:broader vp:Health .
-vp:DisabilitySupport a skos:Concept ;
-    skos:prefLabel "Disability Support"@en ;
-    skos:broader vp:Health .
-vp:ElderCare a skos:Concept ;
-    skos:prefLabel "Elder Care"@en ;
-    skos:broader vp:Health .
-
-# Education causes
-vp:EducationCause a skos:Concept ;
-    skos:prefLabel "Education"@en ;
-    skos:broader vp:Education .
-vp:YouthDevelopment a skos:Concept ;
-    skos:prefLabel "Youth Development"@en ;
-    skos:broader vp:Education .
-vp:Mentoring a skos:Concept ;
-    skos:prefLabel "Mentoring"@en ;
-    skos:broader vp:Education .
-vp:Literacy a skos:Concept ;
-    skos:prefLabel "Literacy"@en ;
-    skos:broader vp:Education .
-
-# Environment causes
-vp:EnvironmentalConservation a skos:Concept ;
-    skos:prefLabel "Environmental Conservation"@en ;
-    skos:broader vp:Environment .
-vp:ClimateAction a skos:Concept ;
-    skos:prefLabel "Climate Action"@en ;
-    skos:broader vp:Environment .
-vp:WildlifeProtection a skos:Concept ;
-    skos:prefLabel "Wildlife Protection"@en ;
-    skos:broader vp:Environment .
-vp:SustainableLiving a skos:Concept ;
-    skos:prefLabel "Sustainable Living"@en ;
-    skos:broader vp:Environment .
-
-# Community causes
-vp:Homelessness a skos:Concept ;
-    skos:prefLabel "Homelessness"@en ;
-    skos:broader vp:Community .
-vp:FoodSecurity a skos:Concept ;
-    skos:prefLabel "Food Security"@en ;
-    skos:broader vp:Community .
-vp:CommunityDevelopment a skos:Concept ;
-    skos:prefLabel "Community Development"@en ;
-    skos:broader vp:Community .
-vp:SocialInclusion a skos:Concept ;
-    skos:prefLabel "Social Inclusion"@en ;
-    skos:broader vp:Community .
-vp:RefugeeSupport a skos:Concept ;
-    skos:prefLabel "Refugee Support"@en ;
-    skos:broader vp:Community .
-
-# Arts & Recreation causes
-vp:ArtsAndCulture a skos:Concept ;
-    skos:prefLabel "Arts and Culture"@en ;
-    skos:broader vp:ArtsAndRecreation .
-vp:HeritagePreservation a skos:Concept ;
-    skos:prefLabel "Heritage Preservation"@en ;
-    skos:broader vp:ArtsAndRecreation .
-vp:Sports a skos:Concept ;
-    skos:prefLabel "Sports"@en ;
-    skos:broader vp:ArtsAndRecreation .
-
-# Emergency causes
-vp:DisasterRelief a skos:Concept ;
-    skos:prefLabel "Disaster Relief"@en ;
-    skos:broader vp:Emergency .
-vp:EmergencyResponse a skos:Concept ;
-    skos:prefLabel "Emergency Response"@en ;
-    skos:broader vp:Emergency .
-
-# Animal Welfare causes
-vp:AnimalWelfareCause a skos:Concept ;
-    skos:prefLabel "Animal Welfare"@en ;
-    skos:broader vp:AnimalWelfare .
-vp:AnimalRescue a skos:Concept ;
-    skos:prefLabel "Animal Rescue"@en ;
-    skos:broader vp:AnimalWelfare .
-
-# International causes
-vp:InternationalDevelopment a skos:Concept ;
-    skos:prefLabel "International Development"@en ;
-    skos:broader vp:International .
-vp:HumanRights a skos:Concept ;
-    skos:prefLabel "Human Rights"@en ;
-    skos:broader vp:International .
+vp:AnimalWelfare a skos:Concept ; skos:prefLabel "Animal Welfare"@en .
+vp:AntiPoverty a skos:Concept ; skos:prefLabel "Anti-Poverty"@en .
+vp:ArtsAndCulture a skos:Concept ; skos:prefLabel "Arts and Culture"@en .
+vp:Care a skos:Concept ; skos:prefLabel "Care"@en .
+vp:CivilRights a skos:Concept ; skos:prefLabel "Civil Rights"@en .
+vp:Community a skos:Concept ; skos:prefLabel "Community"@en .
+vp:CrimeSafety a skos:Concept ; skos:prefLabel "Crime / Safety"@en .
+vp:CrimeExOffenders a skos:Concept ; skos:prefLabel "Crime & ex-offenders"@en .
+vp:DevelopmentEmergencyRelief a skos:Concept ; skos:prefLabel "Development & emergency relief"@en .
+vp:Disability a skos:Concept ; skos:prefLabel "Disability"@en .
+vp:EducationLanguages a skos:Concept ; skos:prefLabel "Education & languages"@en .
+vp:Environment a skos:Concept ; skos:prefLabel "Environment"@en .
+vp:EthnicMinorities a skos:Concept ; skos:prefLabel "Ethnic Minorities"@en .
+vp:Families a skos:Concept ; skos:prefLabel "Families"@en .
+vp:GenderSexuality a skos:Concept ; skos:prefLabel "Gender / Sexuality"@en .
+vp:GeneralPublic a skos:Concept ; skos:prefLabel "General Public"@en .
+vp:Health a skos:Concept ; skos:prefLabel "Health"@en .
+vp:Heritage a skos:Concept ; skos:prefLabel "Heritage"@en .
+vp:Housing a skos:Concept ; skos:prefLabel "Housing"@en .
+vp:Illness a skos:Concept ; skos:prefLabel "Illness"@en .
+vp:InCare a skos:Concept ; skos:prefLabel "In Care"@en .
+vp:LearningDisabilities a skos:Concept ; skos:prefLabel "Learning Disabilities"@en .
+vp:LGBT a skos:Concept ; skos:prefLabel "LGBT"@en .
+vp:LiteracyNeeds a skos:Concept ; skos:prefLabel "Literacy Needs"@en .
+vp:LocalAuthority a skos:Concept ; skos:prefLabel "Local Authority"@en .
+vp:LocalCommunity a skos:Concept ; skos:prefLabel "Local Community"@en .
+vp:LoneParents a skos:Concept ; skos:prefLabel "Lone Parents"@en .
+vp:LowIncomeHouseholds a skos:Concept ; skos:prefLabel "Low Income Households"@en .
+vp:MensGroups a skos:Concept ; skos:prefLabel "Mens Groups"@en .
+vp:MentalHealth a skos:Concept ; skos:prefLabel "Mental Health"@en .
+vp:OffendersAndExOffenders a skos:Concept ; skos:prefLabel "Offenders and Ex-Offenders"@en .
+vp:OlderPeople a skos:Concept ; skos:prefLabel "Older People"@en .
+vp:OverseasAidDevelopingWorld a skos:Concept ; skos:prefLabel "Overseas Aid / Developing World"@en .
+vp:Parents a skos:Concept ; skos:prefLabel "Parents"@en .
+vp:PhysicalDisability a skos:Concept ; skos:prefLabel "Physical Disability"@en .
+vp:RefugeesAsylumSeekers a skos:Concept ; skos:prefLabel "Refugees / Asylum Seekers"@en .
+vp:ReligionFaith a skos:Concept ; skos:prefLabel "Religion & Faith"@en .
+vp:ResidentsOfDisadvantagedNeighbourhoods a skos:Concept ; skos:prefLabel "Residents of Disadvantaged Neighbourhoods"@en .
+vp:SensoryImpairment a skos:Concept ; skos:prefLabel "Sensory Impairment"@en .
+vp:SportOutdoorActivities a skos:Concept ; skos:prefLabel "Sport & Outdoor Activities"@en .
+vp:SubstanceAbuse a skos:Concept ; skos:prefLabel "Substance Abuse"@en .
+vp:Unemployment a skos:Concept ; skos:prefLabel "Unemployment"@en .
+vp:VictimsOfCrime a skos:Concept ; skos:prefLabel "Victims of Crime"@en .
+vp:WomensGroups a skos:Concept ; skos:prefLabel "Womens Groups"@en .
+vp:YouthChildren a skos:Concept ; skos:prefLabel "Youth & children"@en .
 
 
 # =============================================================================
