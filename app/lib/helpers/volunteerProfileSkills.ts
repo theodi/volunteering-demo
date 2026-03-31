@@ -3,7 +3,7 @@
  * availability, and credentials in the volunteer profile document at
  * {pod}/volunteer/profile.ttl.
  *
- * Uses rdfjs-wrapper VolunteerProfile for clean RDF access; N3 for serialization.
+ * Uses @rdfjs/wrapper VolunteerProfile for clean RDF access; N3 for serialization.
  *
  * All functions are pure async — caching and dedup are handled by React Query
  * at the hook layer.

@@ -1,4 +1,4 @@
-# rdfjs-wrapper Usage in volunteering-demo
+# @rdfjs/wrapper Usage in volunteering-demo
 
 This document explains how the **rdfjs-wrapper** library is used in this codebase to read and write RDF data stored in Solid Pods. It covers the wrapper classes, vocabulary definitions, helper patterns, and concrete examples drawn from the actual source files.
 
@@ -6,9 +6,9 @@ This document explains how the **rdfjs-wrapper** library is used in this codebas
 
 ## 1. Overview
 
-### 1.1 What is rdfjs-wrapper?
+### 1.1 What is @rdfjs/wrapper?
 
-[`rdfjs-wrapper`](https://www.npmjs.com/package/rdfjs-wrapper) is a small library that wraps RDF/JS datasets and terms in TypeScript classes. Instead of manually querying quads, you define **getter properties** on class subclasses that declaratively map RDF predicates to typed values.
+[`@rdfjs/wrapper`](https://www.npmjs.com/package/@rdfjs/wrapper) is a small library that wraps RDF/JS datasets and terms in TypeScript classes. Instead of manually querying quads, you define **getter properties** on class subclasses that declaratively map RDF predicates to typed values.
 
 ### 1.2 How this project uses it
 
@@ -26,12 +26,12 @@ From `package.json`:
 ```json
 {
   "n3": "^2.0.1",
-  "rdfjs-wrapper": "^0.28.0"
+  "@rdfjs/wrapper": "^0.32.0"
 }
 ```
 
 - **n3** — Parse Turtle (`Parser`), in-memory quad store (`Store`), write Turtle (`Writer`), and `DataFactory` for creating RDF terms.
-- **rdfjs-wrapper** — `TermWrapper`, `DatasetWrapper`, `ValueMapping`, `TermMapping`, `ObjectMapping`.
+- **@rdfjs/wrapper** — `TermWrapper`, `DatasetWrapper`, `LiteralAs`, `NamedNodeAs`, `NamedNodeFrom`, `TermAs`, `TermFrom`.
 
 ---
 
@@ -75,69 +75,66 @@ export const RDFS  = { label: "http://www.w3.org/2000/01/rdf-schema#label" } as 
 | `singularNullable(predicate, mapping)` | `T \| undefined` | Read a single value for a predicate. Returns `undefined` if no match or multiple. |
 | `objects(predicate, readMapping, writeMapping)` | `Set<T>` | Read/write set of values. The set is live — `add()` / `delete()` / `clear()` mutate the underlying dataset. |
 
-### 3.2 Mappings
+### 3.2 Mappings (v0.32+)
 
 | Mapping | Usage |
 |---------|-------|
-| `ValueMapping.literalToString` | Read a literal's string value. |
-| `ValueMapping.iriToString` | Read a named node's IRI as a string. |
-| `TermMapping.stringToIri` | Write a string back as a named node (IRI). |
-| `ObjectMapping.as(SomeClass)` | Wrap the object node in a TermWrapper subclass. |
+| `LiteralAs.string` | Read a literal's string value. |
+| `NamedNodeAs.string` | Read a named node's IRI as a string. |
+| `NamedNodeFrom.string` | Write a string back as a named node (IRI). |
+| `TermAs.instance(SomeClass)` | Wrap the object node in a TermWrapper subclass (getter). |
+| `TermFrom.instance` | Write back a TermWrapper instance (setter / set write mapping). |
+
+**Migration from old API (< v0.29):**
+
+| Old | New |
+|-----|-----|
+| `ValueMapping.literalToString` | `LiteralAs.string` |
+| `ValueMapping.literalToNumber` | `LiteralAs.number` |
+| `ValueMapping.literalToDate` | `LiteralAs.date` |
+| `ValueMapping.iriToString` | `NamedNodeAs.string` |
+| `TermMapping.stringToIri` | `NamedNodeFrom.string` |
+| `ObjectMapping.as(Class)` (getter) | `TermAs.instance(Class)` |
+| `ObjectMapping.as(Class)` (setter) | `TermFrom.instance` |
+| `this.term.value` | `this.value` |
 
 ### 3.3 Example: Agent (WebID profile subject)
 
 **File:** `app/lib/class/Agent.ts`
 
 ```ts
-import { TermWrapper, ValueMapping, TermMapping, ObjectMapping } from "rdfjs-wrapper";
+import { TermWrapper, LiteralAs, NamedNodeAs, NamedNodeFrom, TermAs, TermFrom } from "@rdfjs/wrapper";
 import { FOAF, PIM, SOLID, VCARD, SCHEMA } from "@/app/lib/class/Vocabulary";
 
 class HasValue extends TermWrapper {
-  get value(): string {
-    const literal = this.singularNullable(VCARD.value, ValueMapping.literalToString);
-    if (literal != null) return literal;
-    const iri = this.singularNullable(VCARD.value, ValueMapping.iriToString);
-    if (iri != null) return iri;
-    return this.term.value;            // fallback to the node's own IRI
+  get actualValue(): string {
+    return this.singularNullable(VCARD.value, LiteralAs.string) ?? this.value;
   }
 }
 
 export class Agent extends TermWrapper {
-  // Simple literal getter
-  get name(): string | null {
-    return this.vcardFn ?? this.foafName ?? null;
-  }
-
   get vcardFn(): string | undefined {
-    return this.singularNullable(VCARD.fn, ValueMapping.literalToString);
+    return this.singularNullable(VCARD.fn, LiteralAs.string);
   }
 
-  // Nested object: wrap the email node in HasValue
   get hasEmail(): HasValue | undefined {
-    return this.singularNullable(VCARD.hasEmail, ObjectMapping.as(HasValue));
+    return this.singularNullable(VCARD.hasEmail, TermAs.instance(HasValue));
   }
 
   get email(): string | null {
-    return this.hasEmail?.value ?? null;
+    return this.hasEmail?.actualValue ?? null;
   }
 
-  // IRI set (read + write)
   get pimStorage(): Set<string> {
-    return this.objects(PIM.storage, ValueMapping.iriToString, TermMapping.stringToIri);
+    return this.objects(PIM.storage, NamedNodeAs.string, NamedNodeFrom.string);
   }
 
-  // Set of nested wrapper objects
   get telephones(): Set<HasValue> {
-    return this.objects(
-      VCARD.hasTelephone,
-      ObjectMapping.as(HasValue),
-      ObjectMapping.as(HasValue),
-    );
+    return this.objects(VCARD.hasTelephone, TermAs.instance(HasValue), TermFrom.instance);
   }
 
-  // Social links via schema:sameAs
   get sameAs(): Set<string> {
-    return this.objects(SCHEMA.sameAs, ValueMapping.iriToString, TermMapping.stringToIri);
+    return this.objects(SCHEMA.sameAs, NamedNodeAs.string, NamedNodeFrom.string);
   }
 }
 ```
@@ -146,7 +143,7 @@ export class Agent extends TermWrapper {
 
 1. **`singularNullable`** for 0-or-1 values (name, email, phone).
 2. **`objects`** for 0-to-many values (storage URLs, social links, knows).
-3. **`ObjectMapping.as(SubClass)`** for nested structures (vCard email → `HasValue` → `.value`).
+3. **`TermAs.instance(SubClass)`** for nested structures (vCard email → `HasValue` → `.actualValue`).
 4. **Fallback chains** — `Agent.name` tries `vcardFn`, then `foafName`, then extracts from the IRI.
 
 ### 3.4 Example: VolunteerProfile (profile data in Pod)
@@ -154,78 +151,64 @@ export class Agent extends TermWrapper {
 **File:** `app/lib/class/VolunteerProfile.ts`
 
 ```ts
-import { TermWrapper, ValueMapping, TermMapping, ObjectMapping } from "rdfjs-wrapper";
+import { TermWrapper, LiteralAs, NamedNodeAs, NamedNodeFrom, TermAs, TermFrom } from "@rdfjs/wrapper";
 import { VP, GEO, RDFS } from "@/app/lib/class/Vocabulary";
 
 class PointNode extends TermWrapper {
   get lat(): number | null {
-    const v = this.singularNullable(GEO.lat, ValueMapping.literalToString);
+    const v = this.singularNullable(GEO.lat, LiteralAs.string);
     return v != null ? Number(v) : null;
   }
   get long(): number | null {
-    const v = this.singularNullable(GEO.long, ValueMapping.literalToString);
+    const v = this.singularNullable(GEO.long, LiteralAs.string);
     return v != null ? Number(v) : null;
   }
 }
 
 class PreferredLocationNode extends TermWrapper {
-  // Nested object: wrap the point blank node
   get point(): PointNode | null {
-    return this.singularNullable(VP.point, ObjectMapping.as(PointNode)) ?? null;
+    return this.singularNullable(VP.point, TermAs.instance(PointNode)) ?? null;
   }
   get rad(): number | null {
-    const v = this.singularNullable(VP.rad, ValueMapping.literalToString);
+    const v = this.singularNullable(VP.rad, LiteralAs.string);
     return v != null ? Number(v) : null;
   }
   get label(): string | null {
-    return this.singularNullable(RDFS.label, ValueMapping.literalToString) ?? null;
+    return this.singularNullable(RDFS.label, LiteralAs.string) ?? null;
   }
 }
 
 export class VolunteerProfile extends TermWrapper {
-  // Simple IRI sets (read + write via .add/.delete/.clear)
   get skills(): Set<string> {
-    return this.objects(VP.hasSkill, ValueMapping.iriToString, TermMapping.stringToIri);
+    return this.objects(VP.hasSkill, NamedNodeAs.string, NamedNodeFrom.string);
   }
   get causes(): Set<string> {
-    return this.objects(VP.preferredCause, ValueMapping.iriToString, TermMapping.stringToIri);
+    return this.objects(VP.preferredCause, NamedNodeAs.string, NamedNodeFrom.string);
   }
   get equipment(): Set<string> {
-    return this.objects(VP.hasRequirement, ValueMapping.iriToString, TermMapping.stringToIri);
+    return this.objects(VP.hasRequirement, NamedNodeAs.string, NamedNodeFrom.string);
   }
 
-  // Nested objects (read-only in the wrapper; manual N3 for writes)
   get locationNodes(): Set<PreferredLocationNode> {
     return this.objects(
       VP.preferredLocation,
-      ObjectMapping.as(PreferredLocationNode),
-      ObjectMapping.as(PreferredLocationNode),
+      TermAs.instance(PreferredLocationNode),
+      TermFrom.instance,
     );
   }
 
   get preferredTimes(): Set<string> {
-    return this.objects(VP.preferredTime, ValueMapping.iriToString, TermMapping.stringToIri);
+    return this.objects(VP.preferredTime, NamedNodeAs.string, NamedNodeFrom.string);
   }
 }
-
-export function wrapVolunteerProfile(
-  subjectIri: string,
-  dataset: DatasetCore,
-  factory: DataFactory,
-): VolunteerProfile {
-  const subject = factory.namedNode(subjectIri);
-  return new VolunteerProfile(subject, dataset, factory);
-}
 ```
-
-**Key insight:** For simple IRI-based properties (skills, causes, equipment, times), the wrapper's live `Set` is used for both reading and writing — call `set.clear()` then `set.add(uri)` and the underlying N3 Store is mutated. For complex structured data (locations, credentials), the wrapper is used for **reading only**, and writes are done with raw N3 `DataFactory` + `Store` operations.
 
 ### 3.5 Example: SKOS concepts (ontology parsing)
 
 **File:** `app/lib/volunteerOntology.ts`
 
 ```ts
-import { TermWrapper, DatasetWrapper, ValueMapping } from "rdfjs-wrapper";
+import { TermWrapper, DatasetWrapper, LiteralAs, NamedNodeAs } from "@rdfjs/wrapper";
 
 const SKOS = {
   prefLabel: "http://www.w3.org/2004/02/skos/core#prefLabel",
@@ -234,18 +217,17 @@ const SKOS = {
 
 class SkosConcept extends TermWrapper {
   get label(): string | undefined {
-    return this.singularNullable(SKOS.prefLabel, ValueMapping.literalToString);
+    return this.singularNullable(SKOS.prefLabel, LiteralAs.string);
   }
 }
 
 class ConceptWithBroader extends SkosConcept {
   get categoryIri(): string | undefined {
-    return this.singularNullable(SKOS.broader, ValueMapping.iriToString);
+    return this.singularNullable(SKOS.broader, NamedNodeAs.string);
   }
   get categoryLabel(): string | undefined {
     const iri = this.categoryIri;
     if (!iri) return undefined;
-    // Create a new wrapper for the broader concept to get its label
     const category = new SkosConcept(
       this.factory.namedNode(iri),
       this.dataset,
@@ -255,8 +237,6 @@ class ConceptWithBroader extends SkosConcept {
   }
 }
 ```
-
-**Key pattern:** You can instantiate wrapper classes *inside* other wrapper getters to follow RDF links. Here, `ConceptWithBroader.categoryLabel` creates a new `SkosConcept` wrapper for the broader concept to read its `skos:prefLabel`.
 
 ---
 
@@ -274,42 +254,19 @@ class ConceptWithBroader extends SkosConcept {
 **File:** `app/lib/class/WebIdDataset.ts`
 
 ```ts
-import { DatasetWrapper } from "rdfjs-wrapper";
+import { DatasetWrapper } from "@rdfjs/wrapper";
 import { Agent } from "@/app/lib/class/Agent";
 import { SOLID } from "@/app/lib/class/Vocabulary";
 
 export class WebIdDataset extends DatasetWrapper {
   get mainSubject(): Agent | undefined {
     for (const s of this.subjectsOf(SOLID.oidcIssuer, Agent)) {
-      return s;   // return the first subject that has solid:oidcIssuer
+      return s;
     }
     return undefined;
   }
 }
 ```
-
-**Usage in `profileUtils.ts`:**
-
-```ts
-const store = new Store();
-store.addQuads(new Parser({ baseIRI: docUrl }).parse(content));
-const agent = new WebIdDataset(store, DataFactory).mainSubject;
-// agent.name, agent.email, agent.storageUrls, ...
-```
-
-### 4.3 Example: VolunteerOntologyDataset
-
-**File:** `app/lib/volunteerOntology.ts`
-
-```ts
-class VolunteerOntologyDataset extends DatasetWrapper {
-  get conceptsWithBroader(): Iterable<ConceptWithBroader> {
-    return this.subjectsOf(SKOS.broader, ConceptWithBroader);
-  }
-}
-```
-
-This finds every SKOS concept that has a `skos:broader` link and wraps it in `ConceptWithBroader`, giving you `.label`, `.categoryIri`, `.categoryLabel` on each.
 
 ---
 
@@ -382,7 +339,7 @@ const turtle = await serializeToTurtle(store);   // serialize the mutated store
 
 ### 5.5 Writing structured data (manual N3 DataFactory)
 
-For complex structures like locations and credentials that use blank nodes, the wrapper is only used for reading. Writes are done directly with N3:
+For complex structures like locations that use blank nodes, the wrapper is only used for reading. Writes are done directly with N3:
 
 ```ts
 import { DataFactory, Store } from "n3";
@@ -391,7 +348,6 @@ const subjectNode = DataFactory.namedNode(subjectIri);
 const locBNode    = DataFactory.blankNode();
 const ptBNode     = DataFactory.blankNode();
 
-// Add the location blank node graph
 store.addQuad(subjectNode, DataFactory.namedNode(VP.preferredLocation), locBNode);
 store.addQuad(locBNode, DataFactory.namedNode(RDF_TYPE), DataFactory.namedNode(VP.PreferredLocation));
 store.addQuad(locBNode, DataFactory.namedNode(VP.point), ptBNode);
@@ -401,168 +357,13 @@ store.addQuad(ptBNode, DataFactory.namedNode(GEO.lat), DataFactory.literal("51.5
 store.addQuad(ptBNode, DataFactory.namedNode(GEO.long), DataFactory.literal("-0.1"));
 ```
 
-### 5.6 Removing structured data (manual N3 Store operations)
-
-Before rewriting, you remove existing blank node subgraphs:
-
-```ts
-const prefLocPred = DataFactory.namedNode(VP.preferredLocation);
-const pointPred   = DataFactory.namedNode(VP.point);
-
-for (const locQuad of store.getQuads(subjectNode, prefLocPred, null, null)) {
-  const locBNode = locQuad.object;
-  // Remove nested point blank node triples
-  for (const ptQuad of store.getQuads(locBNode, pointPred, null, null)) {
-    for (const ptProp of store.getQuads(ptQuad.object, null, null, null)) {
-      store.removeQuad(ptProp);
-    }
-  }
-  // Remove location blank node triples
-  for (const locProp of store.getQuads(locBNode, null, null, null)) {
-    store.removeQuad(locProp);
-  }
-  store.removeQuad(locQuad);
-}
-```
-
 ---
 
-## 6. Complete data flow: reading and writing to a Solid Pod
-
-### 6.1 Document structure
-
-All volunteer profile data lives in a single Turtle document:
-
-```
-{podRoot}/volunteer/profile.ttl
-```
-
-Subject IRI: `{podRoot}/volunteer/profile.ttl#me`
-
-Example Turtle output:
-
-```turtle
-@prefix vp: <https://id.volunteeringdata.io/volunteer-profile/> .
-@prefix volunteering: <https://ns.volunteeringdata.io/> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
-
-<#me> a vp:VolunteerProfile ;
-    vp:hasSkill volunteering:FirstAid, volunteering:Driving ;
-    vp:preferredCause volunteering:Environment, volunteering:Education ;
-    vp:preferredTime volunteering:MondayMorning, volunteering:WednesdayEvening ;
-    vp:preferredLocation _:loc1 ;
-    vp:hasCredential _:cred1 .
-
-_:loc1 a vp:PreferredLocation ;
-    vp:point _:pt1 ;
-    vp:rad "10" ;
-    rdfs:label "London" .
-
-_:pt1 a vp:Point ;
-    geo:lat "51.5" ;
-    geo:long "-0.1" .
-
-_:cred1 a vp:Credential ;
-    vp:credentialType volunteering:DBSCheck ;
-    vp:credentialIssuer <https://www.gov.uk/...> ;
-    vp:credentialTitle "UK DBS Check" ;
-    vp:credentialStatus "collect" ;
-    vp:credentialIssuedAt "2026-03-24T11:00:00Z"^^xsd:dateTime ;
-    rdfs:label "Disclosure and Barring Service GOV.UK" .
-```
-
-### 6.2 Read flow
-
-```
-1. HTTP GET  {podRoot}/volunteer/profile.ttl  (with authenticated fetch)
-2. Parse response text → N3 Store  (parseTurtle)
-3. Wrap store in TermWrapper       (wrapVolunteerProfile)
-4. Read properties via getters     (profile.skills, profile.locationNodes, etc.)
-```
-
-### 6.3 Write flow (simple IRIs)
-
-```
-1. HTTP GET  existing document → parse into N3 Store
-2. Wrap store with VolunteerProfile
-3. Mutate the live Set: set.clear() + set.add(uri)
-4. Serialize store → Turtle         (serializeToTurtle)
-5. HTTP PUT  the new Turtle back    (Content-Type: text/turtle)
-```
-
-### 6.4 Write flow (structured blank nodes)
-
-```
-1. HTTP GET  existing document → parse into N3 Store
-2. Remove old blank node subgraphs  (store.getQuads + store.removeQuad)
-3. Add new blank nodes + triples    (DataFactory.blankNode + store.addQuad)
-4. Serialize store → Turtle         (serializeToTurtle)
-5. HTTP PUT  the new Turtle back    (Content-Type: text/turtle)
-```
-
-### 6.5 Reading the WebID profile
-
-```
-1. HTTP GET  webId document  (text/turtle)
-2. Parse → N3 Store
-3. Wrap with WebIdDataset → .mainSubject → Agent
-4. Read: agent.name, agent.email, agent.storageUrls, agent.photoUrl, ...
-```
-
----
-
-## 7. Helper file structure
-
-**File:** `app/lib/helpers/volunteerProfileSkills.ts`
-
-This single file is the central helper for all volunteer profile read/write operations. It contains:
-
-| Section | Functions | Data shape |
-|---------|-----------|------------|
-| **Shared utilities** | `volunteerProfileDoc()`, `parseTurtle()`, `serializeToTurtle()` | — |
-| **Generic read/write** | `readPropertyFromPod()`, `writePropertyToPod()` | Simple IRI arrays via `VolunteerProfile` wrapper |
-| **Skills** | `readSkillsFromPod()`, `writeSkillsToPod()` | `string[]` of skill IRIs |
-| **Causes** | `readCausesFromPod()`, `writeCausesToPod()` | `string[]` of cause IRIs |
-| **Equipment** | `readEquipmentFromPod()`, `writeEquipmentToPod()` | `string[]` of equipment IRIs |
-| **Locations** | `readLocationsFromPod()`, `writeLocationsToPod()` | `SavedLocation[]` (blank nodes) |
-| **Availability** | `readTimesFromPod()`, `writeTimesToPod()`, `slotsToTimeIris()`, `timeIrisToSlots()` | Composed time IRIs ↔ scheduler slots |
-| **Credentials** | `readCredentialsFromPod()`, `writeCredentialToPod()`, `updateCredentialStatusInPod()` | `PodCredential[]` (blank nodes) |
-
-**File:** `app/lib/helpers/profileUtils.ts`
-
-Fetches and parses the WebID profile document into an `Agent`:
-
-```ts
-export async function fetchAndParseProfile(
-  webId: string,
-  fetchFn: typeof fetch = fetch,
-): Promise<Agent | null> {
-  const docUrl = webId.split("#")[0];
-  const res = await fetchFn(docUrl, {
-    headers: { Accept: "text/turtle, application/turtle, text/n3, application/n3" },
-  });
-  const content = await res.text();
-  const store = new Store();
-  store.addQuads(new Parser({ baseIRI: docUrl }).parse(content));
-  return new WebIdDataset(store, DataFactory).mainSubject ?? null;
-}
-```
-
----
-
-## 8. Adding a new property to the volunteer profile
+## 6. Adding a new property to the volunteer profile
 
 ### Step 1: Add vocabulary IRIs
 
-In `Vocabulary.ts`, add the new predicate(s) to the `VP` object:
-
-```ts
-export const VP = {
-  // ...existing
-  hasLanguage: "https://id.volunteeringdata.io/volunteer-profile/hasLanguage",
-} as const;
-```
+In `Vocabulary.ts`, add the new predicate(s) to the `VP` object.
 
 ### Step 2a: Simple IRI property
 
@@ -570,7 +371,7 @@ Add a getter to `VolunteerProfile`:
 
 ```ts
 get languages(): Set<string> {
-  return this.objects(VP.hasLanguage, ValueMapping.iriToString, TermMapping.stringToIri);
+  return this.objects(VP.hasLanguage, NamedNodeAs.string, NamedNodeFrom.string);
 }
 ```
 
@@ -578,7 +379,7 @@ Then add `"languages"` to the `ProfileProperty` union type in `volunteerProfileS
 
 ### Step 2b: Structured blank node property
 
-Add a read-only getter to `VolunteerProfile` using `ObjectMapping.as(YourNodeClass)`, then write manual N3 read/write functions in `volunteerProfileSkills.ts` following the locations or credentials pattern.
+Add a read-only getter to `VolunteerProfile` using `TermAs.instance(YourNodeClass)`, then write manual N3 read/write functions in `volunteerProfileSkills.ts` following the locations pattern.
 
 ### Step 3: Create a hook
 
@@ -586,14 +387,13 @@ Follow the pattern in any `useVolunteerProfile*.ts` hook — use `useSolidAuth()
 
 ---
 
-## 9. Summary of patterns
+## 7. Summary of patterns
 
 | Pattern | When to use | Example |
 |---------|------------|---------|
-| `singularNullable(pred, ValueMapping)` | 0-or-1 literal/IRI value | `agent.name`, `location.label` |
-| `objects(pred, ValueMapping, TermMapping)` | 0-to-many IRI values (read + write) | `profile.skills`, `agent.pimStorage` |
-| `objects(pred, ObjectMapping.as(Class))` | 0-to-many nested objects | `profile.locationNodes`, `agent.telephones` |
+| `singularNullable(pred, LiteralAs.string)` | 0-or-1 literal value | `agent.name`, `location.label` |
+| `objects(pred, NamedNodeAs.string, NamedNodeFrom.string)` | 0-to-many IRI values (read + write) | `profile.skills`, `agent.pimStorage` |
+| `objects(pred, TermAs.instance(Class), TermFrom.instance)` | 0-to-many nested objects | `profile.locationNodes`, `agent.telephones` |
 | `DatasetWrapper.subjectsOf(pred, Class)` | Find root subjects in a dataset | `WebIdDataset.mainSubject` |
-| `DatasetWrapper.instancesOf(type, Class)` | Find subjects by rdf:type | Not used here, but available |
-| Manual N3 `DataFactory` + `Store` | Write structured blank node graphs | Locations, credentials |
+| Manual N3 `DataFactory` + `Store` | Write structured blank node graphs | Locations |
 | `parseTurtle()` + `serializeToTurtle()` | Round-trip Turtle to/from N3 Store | All Pod read/write operations |

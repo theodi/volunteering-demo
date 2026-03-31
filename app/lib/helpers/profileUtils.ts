@@ -4,7 +4,7 @@ import type { Agent } from "@/app/lib/class/Agent";
 
 /**
  * Fetches the WebID profile document, parses it as Turtle, and returns the
- * main Agent via rdfjs-wrapper. Returns null if the fetch or parse fails.
+ * main Agent via @rdfjs/wrapper. Returns null if the fetch or parse fails.
  *
  * Pure async — caching and dedup are handled by React Query (useAgent hook).
  */

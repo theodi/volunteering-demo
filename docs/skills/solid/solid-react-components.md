@@ -283,7 +283,7 @@ export function useAgent(): UseAgentResult {
 **What this does:**
 
 1. Uses `useSolidAuth()` to get the logged-in WebID and authenticated fetch.
-2. Fetches the WebID profile document, parses it with N3, and wraps it with rdfjs-wrapper into an `Agent` object.
+2. Fetches the WebID profile document, parses it with N3, and wraps it with `@rdfjs/wrapper` into an `Agent` object.
 3. Caches the result forever (`gcTime: POSITIVE_INFINITY`) — the profile is parsed once per login.
 4. On logout (`webId` becomes null), clears the entire React Query cache.
 

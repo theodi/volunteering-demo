@@ -1,32 +1,30 @@
 import {
   TermWrapper,
-  ValueMapping,
-  TermMapping,
-  ObjectMapping,
-} from "rdfjs-wrapper";
+  LiteralAs,
+  NamedNodeAs,
+  NamedNodeFrom,
+  TermAs,
+  TermFrom,
+} from "@rdfjs/wrapper";
 import { FOAF, PIM, SOLID, VCARD, SCHEMA } from "@/app/lib/class/Vocabulary";
 
 /**
  * Wraps a vCard node that has vcard:value (e.g. email, telephone, url).
- * We use VCARD.value (...#value), not hasValue (...#hasValue), to match the W3C vCard ontology;
+ * We use VCARD.value (...#value), not hasValue (...#hasValue), to match the W3C vCard ontology.
+ * Renamed to actualValue because TermWrapper now exposes `value` directly.
  */
 class HasValue extends TermWrapper {
-  /** Resolves vcard:value (literal or IRI like mailto:/tel:) from this node. */
-  get value(): string {
-    const literal = this.singularNullable(VCARD.value, ValueMapping.literalToString);
-    if (literal != null) return literal;
-    const iri = this.singularNullable(VCARD.value, ValueMapping.iriToString);
-    if (iri != null) return iri;
-    return this.term.value;
+  get actualValue(): string {
+    return this.singularNullable(VCARD.value, LiteralAs.string) ?? this.value;
   }
 }
 
 class Address extends TermWrapper {
   get region(): string | null {
-    return this.singularNullable(VCARD.region, ValueMapping.literalToString) ?? null;
+    return this.singularNullable(VCARD.region, LiteralAs.string) ?? null;
   }
   get countryName(): string | null {
-    return this.singularNullable(VCARD.countryName, ValueMapping.literalToString) ?? null;
+    return this.singularNullable(VCARD.countryName, LiteralAs.string) ?? null;
   }
   get formatted(): string {
     const parts = [this.region, this.countryName].filter(Boolean);
@@ -36,56 +34,56 @@ class Address extends TermWrapper {
 
 export class Agent extends TermWrapper {
   get vcardFn(): string | undefined {
-    return this.singularNullable(VCARD.fn, ValueMapping.literalToString);
+    return this.singularNullable(VCARD.fn, LiteralAs.string);
   }
 
   get vcardHasUrl(): string | undefined {
-    return this.singularNullable(VCARD.hasUrl, ValueMapping.iriToString);
+    return this.singularNullable(VCARD.hasUrl, NamedNodeAs.string);
   }
 
   get organization(): string | null {
     return (
-      this.singularNullable(VCARD.organizationName, ValueMapping.literalToString) ??
+      this.singularNullable(VCARD.organizationName, LiteralAs.string) ??
       null
     );
   }
 
   get role(): string | null {
     return (
-      this.singularNullable(VCARD.role, ValueMapping.literalToString) ?? null
+      this.singularNullable(VCARD.role, LiteralAs.string) ?? null
     );
   }
 
   get title(): string | null {
-    return this.singularNullable(VCARD.title, ValueMapping.literalToString) ?? null;
+    return this.singularNullable(VCARD.title, LiteralAs.string) ?? null;
   }
 
   get phone(): string | null {
-    const first = this.hasTelephone?.value ?? null;
+    const first = this.hasTelephone?.actualValue ?? null;
     if (first != null) return first;
     const all = this.telephones;
     if (all.size === 0) return null;
-    return [...all][0]?.value ?? null;
+    return [...all][0]?.actualValue ?? null;
   }
 
-  /** All telephone nodes (use .value on each for the number). */
+  /** All telephone nodes (use .actualValue on each for the number). */
   get telephones(): Set<HasValue> {
-    return this.objects(VCARD.hasTelephone, ObjectMapping.as(HasValue), ObjectMapping.as(HasValue));
+    return this.objects(VCARD.hasTelephone, TermAs.instance(HasValue), TermFrom.instance);
   }
 
   get hasTelephone(): HasValue | undefined {
-    return this.singularNullable(VCARD.hasTelephone, ObjectMapping.as(HasValue));
+    return this.singularNullable(VCARD.hasTelephone, TermAs.instance(HasValue));
   }
 
   get foafName(): string | undefined {
-    return this.singularNullable(FOAF.fname, ValueMapping.literalToString);
+    return this.singularNullable(FOAF.fname, LiteralAs.string);
   }
 
   get name(): string | null {
     return (
       this.vcardFn ??
       this.foafName ??
-      this.term.value.split("/").pop()?.split("#")[0] ??
+      this.value.split("/").pop()?.split("#")[0] ??
       null
     );
   }
@@ -95,56 +93,52 @@ export class Agent extends TermWrapper {
   }
 
   get foafHomepage(): string | undefined {
-    return this.singularNullable(FOAF.homepage, ValueMapping.iriToString);
+    return this.singularNullable(FOAF.homepage, NamedNodeAs.string);
   }
 
   /** vcard:url can point to a node with vcard:value (e.g. WebID URL). */
   get hasUrlValue(): HasValue | undefined {
-    return this.singularNullable(VCARD.hasUrl, ObjectMapping.as(HasValue));
+    return this.singularNullable(VCARD.hasUrl, TermAs.instance(HasValue));
   }
 
   get website(): string | null {
-    return this.hasUrlValue?.value ?? this.vcardHasUrl ?? this.foafHomepage ?? null;
+    return this.hasUrlValue?.actualValue ?? this.vcardHasUrl ?? this.foafHomepage ?? null;
   }
 
   get photoUrl(): string | null {
-    return (
-      this.singularNullable(VCARD.hasPhoto, ValueMapping.iriToString) ??
-      this.singularNullable(VCARD.hasPhoto, ValueMapping.literalToString) ??
-      null
-    );
+    return this.singularNullable(VCARD.hasPhoto, LiteralAs.string) ?? null;
   }
 
   get pimStorage(): Set<string> {
-    return this.objects(PIM.storage, ValueMapping.iriToString, TermMapping.stringToIri);
+    return this.objects(PIM.storage, NamedNodeAs.string, NamedNodeFrom.string);
   }
 
   get solidStorage(): Set<string> {
-    return this.objects(SOLID.storage, ValueMapping.iriToString, TermMapping.stringToIri);
+    return this.objects(SOLID.storage, NamedNodeAs.string, NamedNodeFrom.string);
   }
 
   get email(): string | null {
-    return this.hasEmail?.value ?? null;
+    return this.hasEmail?.actualValue ?? null;
   }
 
   get hasEmail(): HasValue | undefined {
-    return this.singularNullable(VCARD.hasEmail, ObjectMapping.as(HasValue));
+    return this.singularNullable(VCARD.hasEmail, TermAs.instance(HasValue));
   }
 
   get knows(): Set<string> {
-    return this.objects(FOAF.knows, ValueMapping.iriToString, TermMapping.stringToIri);
+    return this.objects(FOAF.knows, NamedNodeAs.string, NamedNodeFrom.string);
   }
 
   get bday(): string | null {
-    return this.singularNullable(VCARD.bday, ValueMapping.literalToString) ?? null;
+    return this.singularNullable(VCARD.bday, LiteralAs.string) ?? null;
   }
 
   get note(): string | null {
-    return this.singularNullable(VCARD.note, ValueMapping.literalToString) ?? null;
+    return this.singularNullable(VCARD.note, LiteralAs.string) ?? null;
   }
 
   get hasAddress(): Address | undefined {
-    return this.singularNullable(VCARD.hasAddress, ObjectMapping.as(Address));
+    return this.singularNullable(VCARD.hasAddress, TermAs.instance(Address));
   }
 
   get location(): string | null {
@@ -153,11 +147,11 @@ export class Agent extends TermWrapper {
   }
 
   get preferredSubjectPronoun(): string | null {
-    return this.singularNullable(SOLID.preferredSubjectPronoun, ValueMapping.literalToString) ?? null;
+    return this.singularNullable(SOLID.preferredSubjectPronoun, LiteralAs.string) ?? null;
   }
 
   /** schema:sameAs URLs (e.g. social profiles). */
   get sameAs(): Set<string> {
-    return this.objects(SCHEMA.sameAs, ValueMapping.iriToString, TermMapping.stringToIri);
+    return this.objects(SCHEMA.sameAs, NamedNodeAs.string, NamedNodeFrom.string);
   }
 }

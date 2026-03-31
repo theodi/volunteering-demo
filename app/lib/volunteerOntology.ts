@@ -5,7 +5,7 @@
  */
 
 import { Parser, Store, DataFactory } from "n3";
-import { TermWrapper, DatasetWrapper, ValueMapping } from "rdfjs-wrapper";
+import { TermWrapper, DatasetWrapper, LiteralAs, NamedNodeAs } from "@rdfjs/wrapper";
 
 const SKOS = {
   prefLabel: "http://www.w3.org/2004/02/skos/core#prefLabel",
@@ -56,14 +56,14 @@ export type VolunteerSkills = {
 
 class SkosConcept extends TermWrapper {
   get label(): string | undefined {
-    return this.singularNullable(SKOS.prefLabel, ValueMapping.literalToString);
+    return this.singularNullable(SKOS.prefLabel, LiteralAs.string);
   }
 }
 
 /** Concept with skos:broader (category). Used for both causes and equipment. */
 class ConceptWithBroader extends SkosConcept {
   get categoryIri(): string | undefined {
-    return this.singularNullable(SKOS.broader, ValueMapping.iriToString);
+    return this.singularNullable(SKOS.broader, NamedNodeAs.string);
   }
 
   get categoryLabel(): string | undefined {
@@ -135,7 +135,7 @@ export function parseVolunteerTtl(turtleText: string): VolunteerCauses {
       categoryOrder.push(catLabel);
       categories[catLabel] = [];
     }
-    const iri = concept.term.value;
+    const iri = concept.value;
     categories[catLabel].push(label);
     causeIriToLabel[iri] = label;
     labelToCauseIri[label] = iri;
@@ -164,7 +164,7 @@ export function parseVolunteerEquipmentTtl(turtleText: string): VolunteerEquipme
     const catLabel = concept.categoryLabel;
     if (!label || !catLabel) continue;
     if (!equipmentCategoryLabels.has(catLabel)) continue;
-    const iri = concept.term.value;
+    const iri = concept.value;
     categories[catLabel].push(label);
     equipmentIriToLabel[iri] = label;
     labelToEquipmentIri[label] = iri;
@@ -193,7 +193,7 @@ export function parseVolunteerSkillsTtl(turtleText: string): VolunteerSkills {
     const catLabel = concept.categoryLabel;
     if (!label || !catLabel) continue;
     if (!skillCategoryLabels.has(catLabel)) continue;
-    const iri = concept.term.value;
+    const iri = concept.value;
     categories[catLabel].push(label);
     skillIriToLabel[iri] = label;
     labelToSkillIri[label] = iri;

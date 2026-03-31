@@ -29,7 +29,7 @@ A **Solid-based** volunteer profile manager built with [Next.js](https://nextjs.
 | Styling | [Tailwind CSS 4](https://tailwindcss.com) |
 | Solid Auth | [`@ldo/solid-react`](https://github.com/o-development/ldo) + [`solid-react-component`](https://www.npmjs.com/package/solid-react-component) |
 | RDF Parsing | [`n3`](https://github.com/rdfjs/N3.js) (Parser, Store, Writer, DataFactory) |
-| RDF Wrapper | [`rdfjs-wrapper`](https://github.com/matthieubosquet/rdfjs-wrapper) (TermWrapper, DatasetWrapper) |
+| RDF Wrapper | [`@rdfjs/wrapper`](https://github.com/rdfjs/wrapper) (TermWrapper, DatasetWrapper) |
 | Data Caching | [`@tanstack/react-query`](https://tanstack.com/query) |
 | Maps | [Leaflet](https://leafletjs.com) + [React Leaflet](https://react-leaflet.js.org) |
 | Icons | [Heroicons](https://heroicons.com) |
@@ -89,7 +89,7 @@ pnpm lint
 │   ├── components/                 # UI components (profile, credentials, map, nav, etc.)
 │   ├── contexts/                   # React contexts (sidebar, volunteer ontology)
 │   └── lib/
-│       ├── class/                  # rdfjs-wrapper classes (Agent, VolunteerProfile, Vocabulary)
+│       ├── class/                  # @rdfjs/wrapper classes (Agent, VolunteerProfile, Vocabulary)
 │       ├── helpers/                # Pure-async Pod read/write helpers
 │       └── hooks/                  # React hooks (useAgent, usePodRoot, useCredentials, etc.)
 ├── ontology/
@@ -156,10 +156,10 @@ The Pod storage URL is derived from the WebID profile (`pim:storage` / `solid:st
 const { podRoot, webId } = usePodRoot();
 ```
 
-### Read / write with rdfjs-wrapper + N3
+### Read / write with @rdfjs/wrapper + N3
 
 1. **GET** the Turtle document → parse with N3 `Parser` → `Store`
-2. Wrap with `VolunteerProfile` (rdfjs-wrapper `TermWrapper`) → read via getters
+2. Wrap with `VolunteerProfile` (`@rdfjs/wrapper` `TermWrapper`) → read via getters
 3. Mutate the live `Set` (simple IRIs) or build blank nodes with `DataFactory` (structured data)
 4. Serialize with N3 `Writer` → **PUT** back
 

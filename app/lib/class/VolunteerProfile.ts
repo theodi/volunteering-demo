@@ -1,9 +1,11 @@
 import {
   TermWrapper,
-  ValueMapping,
-  TermMapping,
-  ObjectMapping,
-} from "rdfjs-wrapper";
+  LiteralAs,
+  NamedNodeAs,
+  NamedNodeFrom,
+  TermAs,
+  TermFrom,
+} from "@rdfjs/wrapper";
 import type { DatasetCore, DataFactory } from "@rdfjs/types";
 import { VP, GEO, RDFS } from "@/app/lib/class/Vocabulary";
 
@@ -12,11 +14,11 @@ import { VP, GEO, RDFS } from "@/app/lib/class/Vocabulary";
  */
 export class PointNode extends TermWrapper {
   get lat(): number | null {
-    const v = this.singularNullable(GEO.lat, ValueMapping.literalToString);
+    const v = this.singularNullable(GEO.lat, LiteralAs.string);
     return v != null ? Number(v) : null;
   }
   get long(): number | null {
-    const v = this.singularNullable(GEO.long, ValueMapping.literalToString);
+    const v = this.singularNullable(GEO.long, LiteralAs.string);
     return v != null ? Number(v) : null;
   }
 }
@@ -27,17 +29,17 @@ export class PointNode extends TermWrapper {
  */
 export class PreferredLocationNode extends TermWrapper {
   get point(): PointNode | null {
-    return this.singularNullable(VP.point, ObjectMapping.as(PointNode)) ?? null;
+    return this.singularNullable(VP.point, TermAs.instance(PointNode)) ?? null;
   }
 
   /** Radius in kilometres. */
   get rad(): number | null {
-    const v = this.singularNullable(VP.rad, ValueMapping.literalToString);
+    const v = this.singularNullable(VP.rad, LiteralAs.string);
     return v != null ? Number(v) : null;
   }
 
   get label(): string | null {
-    return this.singularNullable(RDFS.label, ValueMapping.literalToString) ?? null;
+    return this.singularNullable(RDFS.label, LiteralAs.string) ?? null;
   }
 }
 
@@ -50,24 +52,24 @@ export class VolunteerProfile extends TermWrapper {
   get skills(): Set<string> {
     return this.objects(
       VP.hasSkill,
-      ValueMapping.iriToString,
-      TermMapping.stringToIri,
+      NamedNodeAs.string,
+      NamedNodeFrom.string,
     );
   }
 
   get causes(): Set<string> {
     return this.objects(
       VP.preferredCause,
-      ValueMapping.iriToString,
-      TermMapping.stringToIri,
+      NamedNodeAs.string,
+      NamedNodeFrom.string,
     );
   }
 
   get equipment(): Set<string> {
     return this.objects(
       VP.hasRequirement,
-      ValueMapping.iriToString,
-      TermMapping.stringToIri,
+      NamedNodeAs.string,
+      NamedNodeFrom.string,
     );
   }
 
@@ -75,8 +77,8 @@ export class VolunteerProfile extends TermWrapper {
   get locationNodes(): Set<PreferredLocationNode> {
     return this.objects(
       VP.preferredLocation,
-      ObjectMapping.as(PreferredLocationNode),
-      ObjectMapping.as(PreferredLocationNode),
+      TermAs.instance(PreferredLocationNode),
+      TermFrom.instance,
     );
   }
 
@@ -84,8 +86,8 @@ export class VolunteerProfile extends TermWrapper {
   get preferredTimes(): Set<string> {
     return this.objects(
       VP.preferredTime,
-      ValueMapping.iriToString,
-      TermMapping.stringToIri,
+      NamedNodeAs.string,
+      NamedNodeFrom.string,
     );
   }
 }
