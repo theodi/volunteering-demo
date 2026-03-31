@@ -14,6 +14,7 @@ const SKOS = {
 } as const;
 
 const BASE_IRI = "https://ns.volunteeringdata.io/";
+const CAUSES_SCHEME_IRI = `${BASE_IRI}CausesScheme`;
 const EQUIPMENT_SCHEME_IRI = `${BASE_IRI}EquipmentRequirements`;
 const SKILLS_SCHEME_IRI = `${BASE_IRI}SkillsScheme`;
 
@@ -115,26 +116,23 @@ function getCategoryLabelsFromScheme(
 // —— Public parsers ——
 
 /**
- * Parses Turtle and returns cause categories and labels (all concepts with skos:broader).
+ * Parses Turtle and returns cause categories and labels.
+ * Only includes concepts whose category is in the vp:CausesScheme scheme.
  */
 export function parseVolunteerTtl(turtleText: string): VolunteerCauses {
-  const { dataset } = parseTurtle(turtleText);
+  const { store, dataset } = parseTurtle(turtleText);
+  const categoryOrder = getCategoryLabelsFromScheme(store, dataset, CAUSES_SCHEME_IRI);
+  const causeCategoryLabels = new Set(categoryOrder);
   const categories: CauseCategories = {};
   const causeIriToLabel: Record<string, string> = {};
   const labelToCauseIri: Record<string, string> = {};
-  const categoryOrder: string[] = [];
-  const seenCategories = new Set<string>();
+  for (const cat of categoryOrder) categories[cat] = [];
 
   for (const concept of dataset.conceptsWithBroader) {
     const label = concept.label;
     const catLabel = concept.categoryLabel;
     if (!label || !catLabel) continue;
-
-    if (!seenCategories.has(catLabel)) {
-      seenCategories.add(catLabel);
-      categoryOrder.push(catLabel);
-      categories[catLabel] = [];
-    }
+    if (!causeCategoryLabels.has(catLabel)) continue;
     const iri = concept.value;
     categories[catLabel].push(label);
     causeIriToLabel[iri] = label;

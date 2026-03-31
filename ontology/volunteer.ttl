@@ -36,6 +36,17 @@ vp:AnimalWelfare a skos:Concept ;
 vp:International a skos:Concept ;
     skos:prefLabel "International"@en .
 
+# Concept scheme: defines which categories are "causes" (single source of truth)
+vp:CausesScheme a skos:ConceptScheme ;
+    skos:hasTopConcept vp:Health ;
+    skos:hasTopConcept vp:Education ;
+    skos:hasTopConcept vp:Environment ;
+    skos:hasTopConcept vp:Community ;
+    skos:hasTopConcept vp:ArtsAndRecreation ;
+    skos:hasTopConcept vp:Emergency ;
+    skos:hasTopConcept vp:AnimalWelfare ;
+    skos:hasTopConcept vp:International .
+
 # Health causes
 vp:MentalHealth a skos:Concept ;
     skos:prefLabel "Mental Health"@en ;
