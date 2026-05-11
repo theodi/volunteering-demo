@@ -405,6 +405,11 @@ const VP_CRED = {
   credentialStatus: "https://id.volunteeringdata.io/volunteer-profile/credentialStatus",
   credentialTitle: "https://id.volunteeringdata.io/volunteer-profile/credentialTitle",
   credentialIssuedAt: "https://id.volunteeringdata.io/volunteer-profile/credentialIssuedAt",
+  // Document credential fields (for mock-issued identity documents)
+  documentType: "https://id.volunteeringdata.io/volunteer-profile/documentType",
+  issuingCountry: "https://id.volunteeringdata.io/volunteer-profile/issuingCountry",
+  expiryDate: "https://id.volunteeringdata.io/volunteer-profile/expiryDate",
+  documentNumber: "https://id.volunteeringdata.io/volunteer-profile/documentNumber",
 } as const;
 
 export type CredentialStatus = "collect" | "verified";
@@ -424,6 +429,15 @@ export type PodCredential = {
   status: CredentialStatus;
   /** ISO date string when credential was issued/collected */
   validFrom: string;
+  // --- Optional document credential fields (mock-issued identity documents) ---
+  /** Yoti document type, e.g. "PASSPORT" | "DRIVING_LICENCE" | "NATIONAL_ID" */
+  documentType?: string;
+  /** ISO 3166-1 alpha-3 country code, e.g. "GBR" */
+  issuingCountry?: string;
+  /** Document expiry date as yyyy-mm-dd */
+  expiryDate?: string;
+  /** Document number as printed on the document */
+  documentNumber?: string;
 };
 
 /**
@@ -500,7 +514,20 @@ export async function readCredentialsFromPod(
     const ts = validFrom ? new Date(validFrom).getTime() : Date.now();
     const id = `${fragment}-${ts}`;
 
-    credentials.push({ id, title, issuer: issuerLabel, requirementUri, issuerUri, status, validFrom });
+    // Optional document credential fields
+    const docTypeQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.documentType), null, null);
+    const documentType = docTypeQuads.length > 0 ? docTypeQuads[0].object.value : undefined;
+
+    const countryQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.issuingCountry), null, null);
+    const issuingCountry = countryQuads.length > 0 ? countryQuads[0].object.value : undefined;
+
+    const expiryQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.expiryDate), null, null);
+    const expiryDate = expiryQuads.length > 0 ? expiryQuads[0].object.value : undefined;
+
+    const docNumQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.documentNumber), null, null);
+    const documentNumber = docNumQuads.length > 0 ? docNumQuads[0].object.value : undefined;
+
+    credentials.push({ id, title, issuer: issuerLabel, requirementUri, issuerUri, status, validFrom, documentType, issuingCountry, expiryDate, documentNumber });
   }
 
   return credentials;
@@ -557,6 +584,20 @@ export async function writeCredentialToPod(
     DataFactory.namedNode(VP_CRED.credentialIssuedAt),
     DataFactory.literal(credential.validFrom, DataFactory.namedNode(XSD_DATETIME)),
   );
+
+  // Optional document credential fields
+  if (credential.documentType) {
+    store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.documentType), DataFactory.literal(credential.documentType));
+  }
+  if (credential.issuingCountry) {
+    store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.issuingCountry), DataFactory.literal(credential.issuingCountry));
+  }
+  if (credential.expiryDate) {
+    store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.expiryDate), DataFactory.literal(credential.expiryDate));
+  }
+  if (credential.documentNumber) {
+    store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.documentNumber), DataFactory.literal(credential.documentNumber));
+  }
 
   const turtle = await serializeToTurtle(store);
   const putResponse = await fetchFn(docUrl, {
