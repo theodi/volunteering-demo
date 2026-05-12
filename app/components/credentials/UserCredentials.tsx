@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { PlusIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { CredentialCard } from "./CredentialCard";
 import { AddCredentialModal } from "./AddCredentialModal";
 import type { CredentialType } from "./AddCredentialModal";
+import type { DocumentType } from "@/app/lib/data/mockIssuerDocuments";
 import { HeroText } from "../HeroText";
 import { Button } from "../Button";
 import { EmptyState } from "../profile/EmptyState";
@@ -15,6 +17,7 @@ import { LoadingScreen } from "../LoadingScreen";
 export function UserCredentials() {
     const { credentials, isLoading, addCredential } = useCredentials();
     const [modalOpen, setModalOpen] = useState(false);
+    const router = useRouter();
 
     const handleAddCredential = async (cred: CredentialType) => {
         const newCredential: PodCredential = {
@@ -31,6 +34,10 @@ export function UserCredentials() {
 
     // Extract base IDs (without timestamp suffix) for highlighting already-added types
     const existingIds = new Set(credentials.map((c) => c.id.replace(/-\d+$/, "")));
+
+    const handleDocumentSelect = (documentType: DocumentType) => {
+        router.push(`/mock-issuer/${documentType}`);
+    };
 
     if (isLoading) {
         return <LoadingScreen />;
@@ -92,6 +99,7 @@ export function UserCredentials() {
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
                 onSelect={handleAddCredential}
+                onDocumentSelect={handleDocumentSelect}
                 existingCredentialIds={existingIds}
             />
         </>
