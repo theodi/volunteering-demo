@@ -88,7 +88,7 @@ export function CredentialCard({
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); handleRemove(); }}
                                 className="rounded-md p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-                                title="Remove credential"
+                                aria-label={`Remove ${title}`}
                             >
                                 <TrashIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                             </button>
