@@ -53,7 +53,7 @@ export function UserCredentials() {
     const existingIds = new Set(credentials.map((c) => c.id));
 
     const handleDocumentSelect = (documentType: string, countryCode: string) => {
-        router.push(`/mock-issuer/${documentType}?country=${countryCode}`);
+        router.push(`/credentials/issue/${documentType}?country=${countryCode}`);
     };
 
     const handleConfirmRemove = async () => {
