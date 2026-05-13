@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { PlusIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { CredentialCard } from "./CredentialCard";
 import { AddCredentialModal } from "./AddCredentialModal";
 import type { CredentialType } from "./AddCredentialModal";
-import type { DocumentType } from "@/app/lib/data/mockIssuerDocuments";
+import type { SupportedDocumentEntry } from "@/app/api/yoti/supported-documents/route";
 import { HeroText } from "../HeroText";
 import { Button } from "../Button";
 import { EmptyState } from "../profile/EmptyState";
@@ -14,10 +15,22 @@ import { useCredentials } from "@/app/lib/hooks/useCredentials";
 import type { PodCredential } from "@/app/lib/hooks/useCredentials";
 import { LoadingScreen } from "../LoadingScreen";
 
+async function fetchSupportedDocuments(): Promise<SupportedDocumentEntry[]> {
+    const res = await fetch("/api/yoti/supported-documents");
+    if (!res.ok) throw new Error("Failed to fetch supported documents");
+    return res.json();
+}
+
 export function UserCredentials() {
     const { credentials, isLoading, addCredential } = useCredentials();
     const [modalOpen, setModalOpen] = useState(false);
     const router = useRouter();
+
+    const { data: yotiDocuments = [], isLoading: yotiLoading } = useQuery({
+        queryKey: ["yoti-supported-documents"],
+        queryFn: fetchSupportedDocuments,
+        staleTime: 5 * 60 * 1000, // cache for 5 minutes
+    });
 
     const handleAddCredential = async (cred: CredentialType) => {
         const newCredential: PodCredential = {
@@ -35,8 +48,8 @@ export function UserCredentials() {
     // Extract base IDs (without timestamp suffix) for highlighting already-added types
     const existingIds = new Set(credentials.map((c) => c.id.replace(/-\d+$/, "")));
 
-    const handleDocumentSelect = (documentType: DocumentType) => {
-        router.push(`/mock-issuer/${documentType}`);
+    const handleDocumentSelect = (documentType: string, countryCode: string) => {
+        router.push(`/mock-issuer/${documentType}?country=${countryCode}`);
     };
 
     if (isLoading) {
@@ -101,6 +114,8 @@ export function UserCredentials() {
                 onSelect={handleAddCredential}
                 onDocumentSelect={handleDocumentSelect}
                 existingCredentialIds={existingIds}
+                yotiDocuments={yotiDocuments}
+                yotiLoading={yotiLoading}
             />
         </>
     );

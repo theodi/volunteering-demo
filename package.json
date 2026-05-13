@@ -22,7 +22,8 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-leaflet": "^5.0.0",
-    "solid-react-component": "^0.2.8"
+    "solid-react-component": "^0.2.8",
+    "yoti": "^4.13.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

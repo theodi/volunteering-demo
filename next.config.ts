@@ -12,6 +12,7 @@ const webpackAliasPath = hasProjectLdo
   : path.join(process.cwd(), "node_modules/@ldo/connected-solid/dist/.ldo/solid.shapeTypes.js");
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["yoti"],
   transpilePackages: ["solid-react-component"],
   turbopack: {
     resolveAlias: {
