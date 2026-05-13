@@ -10,7 +10,6 @@
  */
 
 import { Parser, Writer, Store, DataFactory } from "n3";
-import type { BlankNode } from "n3";
 import { wrapVolunteerProfile } from "@/app/lib/class/VolunteerProfile";
 import { VP, GEO, RDFS, VOLUNTEERING_NS } from "@/app/lib/class/Vocabulary";
 import type { SavedLocation } from "@/app/components/volunteer-info/PreferredLocations";
@@ -393,29 +392,15 @@ export async function writeTimesToPod(
 }
 
 // ---------------------------------------------------------------------------
-// Public API — credentials (blank nodes, same pattern as locations)
+// Public API — credentials (hash-URI named nodes via @rdfjs/wrapper)
 // ---------------------------------------------------------------------------
 
-/** Credential-specific VP predicates. */
-const VP_CRED = {
-  hasCredential: "https://id.volunteeringdata.io/volunteer-profile/hasCredential",
-  Credential: "https://id.volunteeringdata.io/volunteer-profile/Credential",
-  credentialType: "https://id.volunteeringdata.io/volunteer-profile/credentialType",
-  credentialIssuer: "https://id.volunteeringdata.io/volunteer-profile/credentialIssuer",
-  credentialStatus: "https://id.volunteeringdata.io/volunteer-profile/credentialStatus",
-  credentialTitle: "https://id.volunteeringdata.io/volunteer-profile/credentialTitle",
-  credentialIssuedAt: "https://id.volunteeringdata.io/volunteer-profile/credentialIssuedAt",
-  // Document credential fields (for mock-issued identity documents)
-  documentType: "https://id.volunteeringdata.io/volunteer-profile/documentType",
-  issuingCountry: "https://id.volunteeringdata.io/volunteer-profile/issuingCountry",
-  expiryDate: "https://id.volunteeringdata.io/volunteer-profile/expiryDate",
-  documentNumber: "https://id.volunteeringdata.io/volunteer-profile/documentNumber",
-} as const;
+import { CredentialNode } from "@/app/lib/class/VolunteerProfile";
 
 export type CredentialStatus = "collect" | "verified";
 
 export type PodCredential = {
-  /** Unique ID, e.g. "dbs-check-1711234567890" */
+  /** Hash-URI fragment used as the credential's stable identifier, e.g. "cred-1711234567890" */
   id: string;
   /** Display title, e.g. "UK DBS Check" */
   title: string;
@@ -441,17 +426,25 @@ export type PodCredential = {
 };
 
 /**
+ * Builds a stable hash-URI fragment for a credential, e.g. "cred-1711234567890".
+ * The timestamp ensures uniqueness when a user has multiple credentials of the
+ * same type.
+ */
+function credentialFragment(credential: PodCredential): string {
+  return `cred-${new Date(credential.validFrom).getTime()}`;
+}
+
+/**
  * Reads all credentials from {pod}/volunteer/profile.ttl.
  *
- * Each credential is a blank node off <#me>:
- *   <#me> vp:hasCredential _:cred .
- *   _:cred a vp:Credential ;
- *       vp:credentialType volunteering:DBSCheck ;
- *       vp:credentialIssuer <https://www.gov.uk/...> ;
- *       vp:credentialTitle "UK DBS Check" ;
- *       vp:credentialStatus "collect" ;
- *       vp:credentialIssuedAt "2026-03-24T11:09:42Z"^^xsd:dateTime ;
- *       rdfs:label "Disclosure and Barring Service GOV.UK" .
+ * Each credential is a named node (hash URI) off <#me>:
+ *   <#me> vp:hasCredential <#cred-1711234567890> .
+ *   <#cred-1711234567890> a vp:Credential ;
+ *       vp:credentialTitle "Driving Licence" ;
+ *       vp:credentialType <https://id.volunteeringdata.io/document/DRIVING_LICENCE> ;
+ *       ...
+ *
+ * Uses the @rdfjs/wrapper CredentialNode class for idiomatic property access.
  */
 export async function readCredentialsFromPod(
   fetchFn: typeof fetch,
@@ -480,63 +473,42 @@ export async function readCredentialsFromPod(
   const store = parseTurtle(text, docUrl);
   if (!store) return [];
 
-  const subjectNode = DataFactory.namedNode(subjectIri);
-  const hasCredPred = DataFactory.namedNode(VP_CRED.hasCredential);
-  const credQuads = store.getQuads(subjectNode, hasCredPred, null, null);
+  const profile = wrapVolunteerProfile(subjectIri, store, DataFactory);
   const credentials: PodCredential[] = [];
 
-  for (const quad of credQuads) {
-    const credNode = quad.object;
+  for (const credNode of profile.credentials) {
+    // Extract the fragment from the named node URI (e.g. "cred-1711234567890")
+    const nodeUri = credNode.value;
+    const fragment = nodeUri.includes("#") ? nodeUri.split("#").pop()! : nodeUri;
 
-    const titleQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.credentialTitle), null, null);
-    const title = titleQuads.length > 0 ? titleQuads[0].object.value : "";
-
-    const typeQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.credentialType), null, null);
-    const requirementUri = typeQuads.length > 0 ? typeQuads[0].object.value : "";
-
-    const issuedAtQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.credentialIssuedAt), null, null);
-    const validFrom = issuedAtQuads.length > 0 ? issuedAtQuads[0].object.value : "";
-
-    const issuerQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.credentialIssuer), null, null);
-    const issuerUri = issuerQuads.length > 0 ? issuerQuads[0].object.value : "";
-
-    const labelQuads = store.getQuads(credNode, DataFactory.namedNode(RDFS.label), null, null);
-    const issuerLabel = labelQuads.length > 0 ? labelQuads[0].object.value : issuerUri;
-
-    const statusQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.credentialStatus), null, null);
-    const status: CredentialStatus =
-      statusQuads.length > 0 && statusQuads[0].object.value === "verified"
-        ? "verified"
-        : "collect";
-
-    // Build a stable ID from the requirement fragment + timestamp
-    const fragment = requirementUri.replace(VOLUNTEERING_NS, "").toLowerCase().replace(/([A-Z])/g, "-$1").replace(/^-/, "");
-    const ts = validFrom ? new Date(validFrom).getTime() : Date.now();
-    const id = `${fragment}-${ts}`;
-
-    // Optional document credential fields
-    const docTypeQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.documentType), null, null);
-    const documentType = docTypeQuads.length > 0 ? docTypeQuads[0].object.value : undefined;
-
-    const countryQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.issuingCountry), null, null);
-    const issuingCountry = countryQuads.length > 0 ? countryQuads[0].object.value : undefined;
-
-    const expiryQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.expiryDate), null, null);
-    const expiryDate = expiryQuads.length > 0 ? expiryQuads[0].object.value : undefined;
-
-    const docNumQuads = store.getQuads(credNode, DataFactory.namedNode(VP_CRED.documentNumber), null, null);
-    const documentNumber = docNumQuads.length > 0 ? docNumQuads[0].object.value : undefined;
-
-    credentials.push({ id, title, issuer: issuerLabel, requirementUri, issuerUri, status, validFrom, documentType, issuingCountry, expiryDate, documentNumber });
+    credentials.push({
+      id: fragment,
+      title: credNode.title ?? "",
+      issuer: credNode.issuerLabel ?? credNode.credentialIssuer ?? "",
+      requirementUri: credNode.credentialType ?? "",
+      issuerUri: credNode.credentialIssuer ?? "",
+      status: credNode.status === "verified" ? "verified" : "collect",
+      validFrom: credNode.issuedAt ?? "",
+      documentType: credNode.documentType,
+      issuingCountry: credNode.issuingCountry,
+      expiryDate: credNode.expiryDate,
+      documentNumber: credNode.documentNumber,
+    });
   }
 
   return credentials;
 }
 
 /**
- * Writes a credential to {pod}/volunteer/profile.ttl as a blank node off <#me>.
- * If a credential with the same requirementUri + validFrom already exists, it
- * is replaced. Otherwise it is appended — preserving all other profile data.
+ * Writes a credential to {pod}/volunteer/profile.ttl as a hash-URI named node.
+ *
+ * Result in the Pod:
+ *   <#me> vp:hasCredential <#cred-1711234567890> .
+ *   <#cred-1711234567890> a vp:Credential ;
+ *       vp:credentialTitle "Driving Licence" ;
+ *       ...
+ *
+ * If a credential with the same hash URI already exists it is replaced.
  */
 export async function writeCredentialToPod(
   fetchFn: typeof fetch,
@@ -567,37 +539,37 @@ export async function writeCredentialToPod(
     store.addQuad(subjectNode, rdfType, DataFactory.namedNode(VP.VolunteerProfile));
   }
 
-  // Remove existing credential that matches (by requirementUri + validFrom)
-  removeMatchingCredential(store, subjectNode, credential.requirementUri, credential.validFrom);
+  // Build the credential's hash URI: profile.ttl#cred-<timestamp>
+  const fragment = credentialFragment(credential);
+  const credUri = `${docUrl}#${fragment}`;
 
-  // Add the credential blank node
-  const credBNode = DataFactory.blankNode();
-  store.addQuad(subjectNode, DataFactory.namedNode(VP_CRED.hasCredential), credBNode);
-  store.addQuad(credBNode, rdfType, DataFactory.namedNode(VP_CRED.Credential));
-  store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.credentialTitle), DataFactory.literal(credential.title));
-  store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.credentialType), DataFactory.namedNode(credential.requirementUri));
-  store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.credentialIssuer), DataFactory.namedNode(credential.issuerUri));
-  store.addQuad(credBNode, DataFactory.namedNode(RDFS.label), DataFactory.literal(credential.issuer));
-  store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.credentialStatus), DataFactory.literal(credential.status));
-  store.addQuad(
-    credBNode,
-    DataFactory.namedNode(VP_CRED.credentialIssuedAt),
-    DataFactory.literal(credential.validFrom, DataFactory.namedNode(XSD_DATETIME)),
-  );
+  // Remove any existing triples for this credential URI (idempotent upsert)
+  const credNode = DataFactory.namedNode(credUri);
+  for (const q of store.getQuads(credNode, null, null, null)) store.removeQuad(q);
+  for (const q of store.getQuads(subjectNode, DataFactory.namedNode(VP.hasCredential), credNode, null)) store.removeQuad(q);
 
-  // Optional document credential fields
-  if (credential.documentType) {
-    store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.documentType), DataFactory.literal(credential.documentType));
-  }
-  if (credential.issuingCountry) {
-    store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.issuingCountry), DataFactory.literal(credential.issuingCountry));
-  }
-  if (credential.expiryDate) {
-    store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.expiryDate), DataFactory.literal(credential.expiryDate));
-  }
-  if (credential.documentNumber) {
-    store.addQuad(credBNode, DataFactory.namedNode(VP_CRED.documentNumber), DataFactory.literal(credential.documentNumber));
-  }
+  // Create the credential via the wrapper — set the link and all properties
+  const profile = wrapVolunteerProfile(subjectIri, store, DataFactory);
+  const newCredNode = new CredentialNode(credNode, store, DataFactory);
+
+  // Add the link: <#me> vp:hasCredential <#cred-...>
+  profile.credentials.add(newCredNode);
+
+  // Type triple: <#cred-...> a vp:Credential
+  store.addQuad(credNode, rdfType, DataFactory.namedNode(VP.Credential));
+
+  // Set properties via the wrapper setters
+  newCredNode.title = credential.title;
+  newCredNode.credentialType = credential.requirementUri;
+  newCredNode.credentialIssuer = credential.issuerUri;
+  newCredNode.issuerLabel = credential.issuer;
+  newCredNode.status = credential.status;
+  newCredNode.issuedAt = credential.validFrom;
+
+  if (credential.documentType) newCredNode.documentType = credential.documentType;
+  if (credential.issuingCountry) newCredNode.issuingCountry = credential.issuingCountry;
+  if (credential.expiryDate) newCredNode.expiryDate = credential.expiryDate;
+  if (credential.documentNumber) newCredNode.documentNumber = credential.documentNumber;
 
   const turtle = await serializeToTurtle(store);
   const putResponse = await fetchFn(docUrl, {
@@ -610,8 +582,8 @@ export async function writeCredentialToPod(
 
 /**
  * Updates the status of an existing credential in the Pod.
- * Finds the matching blank node by timestamp (from the credential ID),
- * swaps the status literal, and PUTs back.
+ * Finds the credential by its hash-URI fragment (from the credential ID),
+ * updates the status property via the wrapper, and PUTs back.
  */
 export async function updateCredentialStatusInPod(
   fetchFn: typeof fetch,
@@ -628,31 +600,14 @@ export async function updateCredentialStatusInPod(
   const store = parseTurtle(text, docUrl);
   if (!store) throw new Error("Failed to parse volunteer profile document");
 
-  const subjectNode = DataFactory.namedNode(subjectIri);
-  const hasCredPred = DataFactory.namedNode(VP_CRED.hasCredential);
-  const statusPred = DataFactory.namedNode(VP_CRED.credentialStatus);
-  const issuedAtPred = DataFactory.namedNode(VP_CRED.credentialIssuedAt);
+  const credUri = `${docUrl}#${credentialId}`;
+  const credNode = new CredentialNode(DataFactory.namedNode(credUri), store, DataFactory);
 
-  const tsMatch = credentialId.match(/-(\d+)$/);
-  const targetTs = tsMatch ? parseInt(tsMatch[1], 10) : null;
-
-  let found = false;
-  for (const quad of store.getQuads(subjectNode, hasCredPred, null, null)) {
-    const credNode = quad.object as BlankNode;
-
-    const issuedAtQuads = store.getQuads(credNode, issuedAtPred, null, null);
-    if (issuedAtQuads.length > 0 && targetTs) {
-      const nodeTs = new Date(issuedAtQuads[0].object.value).getTime();
-      if (nodeTs !== targetTs) continue;
-    }
-
-    for (const sq of store.getQuads(credNode, statusPred, null, null)) store.removeQuad(sq);
-    store.addQuad(credNode, statusPred, DataFactory.literal(newStatus));
-    found = true;
-    break;
+  if (credNode.status === undefined) {
+    throw new Error(`Credential not found in profile: ${credentialId}`);
   }
 
-  if (!found) throw new Error(`Credential not found in profile: ${credentialId}`);
+  credNode.status = newStatus;
 
   const turtle = await serializeToTurtle(store);
   const putResponse = await fetchFn(docUrl, {
@@ -663,29 +618,45 @@ export async function updateCredentialStatusInPod(
   if (!putResponse.ok) throw new Error(`Failed to update credential status: ${putResponse.status}`);
 }
 
-/** Removes a credential blank node that matches requirementUri + validFrom. */
-function removeMatchingCredential(
-  store: Store,
-  subjectNode: ReturnType<typeof DataFactory.namedNode>,
-  requirementUri: string,
-  validFrom: string,
-): void {
-  const hasCredPred = DataFactory.namedNode(VP_CRED.hasCredential);
-  const typePred = DataFactory.namedNode(VP_CRED.credentialType);
-  const issuedAtPred = DataFactory.namedNode(VP_CRED.credentialIssuedAt);
+/**
+ * Removes a credential from {pod}/volunteer/profile.ttl by its hash-URI fragment.
+ * Removes the link from <#me> and all triples about the credential node.
+ */
+export async function removeCredentialFromPod(
+  fetchFn: typeof fetch,
+  podRoot: string,
+  credentialId: string,
+): Promise<void> {
+  const { docUrl, subjectIri } = volunteerProfileDoc(podRoot);
 
-  for (const quad of store.getQuads(subjectNode, hasCredPred, null, null)) {
-    const credNode = quad.object;
-    const typeQuads = store.getQuads(credNode, typePred, null, null);
-    const issuedAtQuads = store.getQuads(credNode, issuedAtPred, null, null);
+  const getRes = await fetchFn(docUrl, { method: "GET", headers: { Accept: "text/turtle" } });
+  if (!getRes.ok) throw new Error(`Failed to read profile for credential removal: ${getRes.status}`);
 
-    if (
-      typeQuads.length > 0 && typeQuads[0].object.value === requirementUri &&
-      issuedAtQuads.length > 0 && issuedAtQuads[0].object.value === validFrom
-    ) {
-      for (const prop of store.getQuads(credNode, null, null, null)) store.removeQuad(prop);
-      store.removeQuad(quad);
-      break;
-    }
+  const text = await getRes.text();
+  const store = parseTurtle(text, docUrl);
+  if (!store) throw new Error("Failed to parse volunteer profile document");
+
+  const credUri = `${docUrl}#${credentialId}`;
+  const credNamedNode = DataFactory.namedNode(credUri);
+  const subjectNode = DataFactory.namedNode(subjectIri);
+
+  // Remove all triples where this credential is the subject
+  const propQuads = store.getQuads(credNamedNode, null, null, null);
+  if (propQuads.length === 0) {
+    throw new Error(`Credential not found in profile: ${credentialId}`);
   }
+  for (const q of propQuads) store.removeQuad(q);
+
+  // Remove the link: <#me> vp:hasCredential <#cred-...>
+  for (const q of store.getQuads(subjectNode, DataFactory.namedNode(VP.hasCredential), credNamedNode, null)) {
+    store.removeQuad(q);
+  }
+
+  const turtle = await serializeToTurtle(store);
+  const putResponse = await fetchFn(docUrl, {
+    method: "PUT",
+    headers: { "Content-Type": "text/turtle" },
+    body: turtle,
+  });
+  if (!putResponse.ok) throw new Error(`Failed to remove credential: ${putResponse.status}`);
 }

@@ -51,14 +51,15 @@ export default function MockIssuerPage({ params }: PageProps) {
 
     setSubmitting(true);
     try {
+      const now = new Date().toISOString();
       const credential: PodCredential = {
-        id: `${rawType.toLowerCase()}-${Date.now()}`,
+        id: `cred-${new Date(now).getTime()}`,
         title: label,
         issuer: `Mock ${label} Authority`,
         requirementUri: `https://id.volunteeringdata.io/document/${rawType}`,
         issuerUri: `https://mock-issuer.volunteeringdata.io/${rawType.toLowerCase().replace(/_/g, "-")}`,
         status: "verified",
-        validFrom: new Date().toISOString(),
+        validFrom: now,
         documentType: rawType,
         issuingCountry: country,
         documentNumber,

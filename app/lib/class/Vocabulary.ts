@@ -38,6 +38,18 @@ export const VP = {
   /** Radius in kilometres. */
   rad: "https://id.volunteeringdata.io/volunteer-profile/rad",
   preferredTime: "https://id.volunteeringdata.io/volunteer-profile/preferredTime",
+  // Credential predicates
+  hasCredential: "https://id.volunteeringdata.io/volunteer-profile/hasCredential",
+  Credential: "https://id.volunteeringdata.io/volunteer-profile/Credential",
+  credentialType: "https://id.volunteeringdata.io/volunteer-profile/credentialType",
+  credentialIssuer: "https://id.volunteeringdata.io/volunteer-profile/credentialIssuer",
+  credentialStatus: "https://id.volunteeringdata.io/volunteer-profile/credentialStatus",
+  credentialTitle: "https://id.volunteeringdata.io/volunteer-profile/credentialTitle",
+  credentialIssuedAt: "https://id.volunteeringdata.io/volunteer-profile/credentialIssuedAt",
+  documentType: "https://id.volunteeringdata.io/volunteer-profile/documentType",
+  issuingCountry: "https://id.volunteeringdata.io/volunteer-profile/issuingCountry",
+  expiryDate: "https://id.volunteeringdata.io/volunteer-profile/expiryDate",
+  documentNumber: "https://id.volunteeringdata.io/volunteer-profile/documentNumber",
 } as const;
 
 /**

@@ -22,7 +22,7 @@ async function fetchSupportedDocuments(): Promise<SupportedDocumentEntry[]> {
 }
 
 export function UserCredentials() {
-    const { credentials, isLoading, addCredential } = useCredentials();
+    const { credentials, isLoading, addCredential, removeCredential } = useCredentials();
     const [modalOpen, setModalOpen] = useState(false);
     const router = useRouter();
 
@@ -33,20 +33,21 @@ export function UserCredentials() {
     });
 
     const handleAddCredential = async (cred: CredentialType) => {
+        const now = new Date().toISOString();
         const newCredential: PodCredential = {
-            id: `${cred.id}-${Date.now()}`,
+            id: `cred-${new Date(now).getTime()}`,
             title: cred.title,
             issuer: cred.issuer,
             requirementUri: cred.requirementUri,
             issuerUri: cred.issuerUri,
             status: "collect",
-            validFrom: new Date().toISOString(),
+            validFrom: now,
         };
         await addCredential(newCredential);
     };
 
-    // Extract base IDs (without timestamp suffix) for highlighting already-added types
-    const existingIds = new Set(credentials.map((c) => c.id.replace(/-\d+$/, "")));
+    // Credential IDs already in the Pod (for highlighting in the modal)
+    const existingIds = new Set(credentials.map((c) => c.id));
 
     const handleDocumentSelect = (documentType: string, countryCode: string) => {
         router.push(`/mock-issuer/${documentType}?country=${countryCode}`);
@@ -101,6 +102,11 @@ export function UserCredentials() {
                                     title={cred.title}
                                     issuer={cred.issuer}
                                     status={cred.status}
+                                    documentType={cred.documentType}
+                                    issuingCountry={cred.issuingCountry}
+                                    expiryDate={cred.expiryDate}
+                                    documentNumber={cred.documentNumber}
+                                    onRemove={(id) => removeCredential(id)}
                                 />
                             ))}
                         </div>
