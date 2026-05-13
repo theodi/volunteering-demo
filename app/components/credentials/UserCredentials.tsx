@@ -63,7 +63,7 @@ export function UserCredentials() {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <HeroText
                         title="Credentials"
-                        description="DBS status drives the &quot;Share DBS&quot; button in Vera"
+                        description="Manage your verified identity documents and certificates"
                         titleClassName="text-xl! sm:text-2xl! font-medium! tracking-tight text-black!"
                         descriptionClassName="mt-2.5! text-sm! sm:text-base! leading-relaxed text-slate-700!"
                     />
