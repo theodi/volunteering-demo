@@ -149,10 +149,11 @@ export function AddCredentialModal({
             isOpen={isOpen}
             onClose={handleClose}
             className="!max-w-xl w-full !border-none !rounded-xl"
+            ariaLabelledBy="add-credential-title"
         >
             <section className="flex flex-col">
                 {/* Header */}
-                <ModalHeader title="Add Credential" onClose={handleClose} />
+                <ModalHeader title="Add Credential" onClose={handleClose} titleId="add-credential-title" />
                 <p className="px-5 pt-3 text-sm text-gray-600 sm:px-6">
                     Select a credential type to verify
                 </p>

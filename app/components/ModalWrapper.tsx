@@ -8,6 +8,8 @@ export interface ModalWrapperProps {
   children: React.ReactNode;
   /** Optional class for the inner modal panel */
   className?: string;
+  /** id of the element that labels this dialog (for screen readers) */
+  ariaLabelledBy?: string;
 }
 
 export function ModalWrapper({
@@ -15,6 +17,7 @@ export function ModalWrapper({
   onClose,
   children,
   className = "",
+  ariaLabelledBy,
 }: ModalWrapperProps) {
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
@@ -40,6 +43,7 @@ export function ModalWrapper({
       className="fixed w-full h-full inset-0 z-1000 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
+      aria-labelledby={ariaLabelledBy}
     >
       <button
         type="button"

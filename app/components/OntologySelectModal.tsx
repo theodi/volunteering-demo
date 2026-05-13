@@ -98,9 +98,9 @@ export function OntologySelectModal<T>({
   const filtered = query ? items.filter((item) => matchesSearch(item, query)) : items;
 
   return (
-    <ModalWrapper isOpen={isOpen} onClose={saveAndClose} className={modalClassName}>
+    <ModalWrapper isOpen={isOpen} onClose={saveAndClose} className={modalClassName} ariaLabelledBy="ontology-modal-title">
       <section className={sectionClassName}>
-        <ModalHeader title={title} onClose={saveAndClose} icon={icon} />
+        <ModalHeader title={title} onClose={saveAndClose} icon={icon} titleId="ontology-modal-title" />
 
         <ModalSearchInput
           value={searchQuery}

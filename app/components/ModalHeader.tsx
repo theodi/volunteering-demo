@@ -6,9 +6,11 @@ export type ModalHeaderProps = {
   onClose: () => void;
   /** Optional icon shown to the left of the title (e.g. HeartIcon, VanIcon) */
   icon?: ReactNode;
+  /** id applied to the heading — use to wire aria-labelledby on the parent dialog */
+  titleId?: string;
 };
 
-export function ModalHeader({ title, onClose, icon }: ModalHeaderProps) {
+export function ModalHeader({ title, onClose, icon, titleId }: ModalHeaderProps) {
   return (
     <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
       <div className="flex items-center gap-2.5">
@@ -17,7 +19,7 @@ export function ModalHeader({ title, onClose, icon }: ModalHeaderProps) {
             {icon}
           </span>
         )}
-        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        <h2 id={titleId} className="text-lg font-semibold text-gray-900">{title}</h2>
       </div>
       <button
         type="button"

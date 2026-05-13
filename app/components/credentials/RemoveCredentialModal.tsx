@@ -26,6 +26,7 @@ export function RemoveCredentialModal({
             isOpen={isOpen}
             onClose={onClose}
             className="!max-w-md w-full !border-none !rounded-xl"
+            ariaLabelledBy="remove-credential-title"
         >
             <div className="flex flex-col items-center gap-4 px-6 py-6 text-center">
                 {/* Warning icon */}
@@ -35,7 +36,7 @@ export function RemoveCredentialModal({
 
                 {/* Title & description */}
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 id="remove-credential-title" className="text-lg font-semibold text-gray-900">
                         Remove Credential
                     </h3>
                     <p className="mt-2 text-sm text-gray-500">
