@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PlusIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { CredentialCard } from "./CredentialCard";
 import { AddCredentialModal } from "./AddCredentialModal";
+import { RemoveCredentialModal } from "./RemoveCredentialModal";
 import type { CredentialType } from "./AddCredentialModal";
 import type { SupportedDocumentEntry } from "@/app/api/yoti/supported-documents/route";
 import { HeroText } from "../HeroText";
@@ -24,6 +25,8 @@ async function fetchSupportedDocuments(): Promise<SupportedDocumentEntry[]> {
 export function UserCredentials() {
     const { credentials, isLoading, addCredential, removeCredential } = useCredentials();
     const [modalOpen, setModalOpen] = useState(false);
+    const [removeTarget, setRemoveTarget] = useState<{ id: string; title: string } | null>(null);
+    const [isRemoving, setIsRemoving] = useState(false);
     const router = useRouter();
 
     const { data: yotiDocuments = [], isLoading: yotiLoading } = useQuery({
@@ -51,6 +54,19 @@ export function UserCredentials() {
 
     const handleDocumentSelect = (documentType: string, countryCode: string) => {
         router.push(`/mock-issuer/${documentType}?country=${countryCode}`);
+    };
+
+    const handleConfirmRemove = async () => {
+        if (!removeTarget) return;
+        setIsRemoving(true);
+        try {
+            await removeCredential(removeTarget.id);
+        } catch (err) {
+            console.error("Failed to remove credential:", err);
+        } finally {
+            setIsRemoving(false);
+            setRemoveTarget(null);
+        }
     };
 
     if (isLoading) {
@@ -106,7 +122,10 @@ export function UserCredentials() {
                                     issuingCountry={cred.issuingCountry}
                                     expiryDate={cred.expiryDate}
                                     documentNumber={cred.documentNumber}
-                                    onRemove={(id) => removeCredential(id)}
+                                    onRemove={(id) => {
+                                        const cred = credentials.find((c) => c.id === id);
+                                        setRemoveTarget({ id, title: cred?.title ?? "this credential" });
+                                    }}
                                 />
                             ))}
                         </div>
@@ -122,6 +141,14 @@ export function UserCredentials() {
                 existingCredentialIds={existingIds}
                 yotiDocuments={yotiDocuments}
                 yotiLoading={yotiLoading}
+            />
+
+            <RemoveCredentialModal
+                isOpen={removeTarget !== null}
+                onClose={() => setRemoveTarget(null)}
+                onConfirm={handleConfirmRemove}
+                credentialTitle={removeTarget?.title ?? ""}
+                isRemoving={isRemoving}
             />
         </>
     );

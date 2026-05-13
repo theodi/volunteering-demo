@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { TrashIcon, CheckBadgeIcon } from "@heroicons/react/24/outline";
 
 export type CredentialStatus = "verified" | "collect";
@@ -16,7 +15,7 @@ export type CredentialCardProps = {
     issuingCountry?: string;
     expiryDate?: string;
     documentNumber?: string;
-    /** Called when the user confirms removal */
+    /** Called when the user clicks the remove button (parent handles confirmation) */
     onRemove?: (credentialId: string) => void;
     /** Makes the entire card clickable */
     onClick?: () => void;
@@ -37,7 +36,6 @@ export function CredentialCard({
     onClick,
     className = "",
 }: CredentialCardProps) {
-    const [confirmRemove, setConfirmRemove] = useState(false);
     const isVerified = status === "verified";
     const isClickable = onClick != null;
 
@@ -45,10 +43,6 @@ export function CredentialCard({
 
     const handleRemove = () => {
         if (!credentialId || !onRemove) return;
-        if (!confirmRemove) {
-            setConfirmRemove(true);
-            return;
-        }
         onRemove(credentialId);
     };
 
@@ -93,11 +87,8 @@ export function CredentialCard({
                             <button
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); handleRemove(); }}
-                                className={`rounded-md p-1.5 transition ${confirmRemove
-                                        ? "bg-red-100 text-red-600 hover:bg-red-200"
-                                        : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                                    }`}
-                                title={confirmRemove ? "Click again to confirm removal" : "Remove credential"}
+                                className="rounded-md p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+                                title="Remove credential"
                             >
                                 <TrashIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                             </button>
