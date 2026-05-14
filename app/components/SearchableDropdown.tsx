@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useId } from "react";
 import { ChevronDownIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export interface SearchableDropdownOption {
@@ -40,6 +40,7 @@ export function SearchableDropdown({
     const [search, setSearch] = useState("");
     const containerRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const labelId = useId();
 
     const selectedOption = options.find((o) => o.value === value);
     const displayLabel = selectedOption?.label ?? placeholder;
@@ -85,7 +86,7 @@ export function SearchableDropdown({
     return (
         <div className={`relative ${className}`} ref={containerRef}>
             {label && (
-                <span className="mb-1.5 block text-sm font-medium text-gray-700">{label}</span>
+                <label id={labelId} className="mb-1.5 block text-sm font-medium text-gray-700">{label}</label>
             )}
 
             {/* Trigger */}
@@ -93,6 +94,9 @@ export function SearchableDropdown({
                 type="button"
                 disabled={disabled}
                 onClick={() => !disabled && setIsOpen((prev) => !prev)}
+                aria-haspopup="listbox"
+                aria-expanded={isOpen}
+                aria-labelledby={label ? labelId : undefined}
                 className={`flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2.5 text-left text-sm shadow-sm transition focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary ${disabled ? "cursor-not-allowed opacity-50" : "hover:border-gray-400"}`}
             >
                 <span className="flex items-center gap-2 truncate">
@@ -123,6 +127,7 @@ export function SearchableDropdown({
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     placeholder={searchPlaceholder}
+                                    aria-label={searchPlaceholder}
                                     className="min-w-0 flex-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
                                 />
                             </div>
