@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 
 export interface ModalWrapperProps {
   isOpen: boolean;
@@ -25,6 +25,51 @@ export function ModalWrapper({
     },
     [onClose]
   );
+
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Trap focus inside the modal
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+
+      const focusable = panel.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    // Focus the first focusable element on open
+    requestAnimationFrame(() => {
+      const focusable = panel.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length > 0) focusable[0].focus();
+    });
+
+    document.addEventListener("keydown", handleTab);
+    return () => document.removeEventListener("keydown", handleTab);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -52,6 +97,7 @@ export function ModalWrapper({
         aria-label="Close modal"
       />
       <div
+        ref={panelRef}
         className={`modal-panel relative w-full max-w-full rounded-2xl border border-blue-custom bg-white shadow-xl sm:max-w-lg ${className}`.trim()}
         onClick={(e) => e.stopPropagation()}
       >
