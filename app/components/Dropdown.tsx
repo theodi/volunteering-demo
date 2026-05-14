@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, type ReactNode } from "react";
+import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 export interface DropdownOption {
@@ -126,6 +126,7 @@ export function ActionMenu({ trigger, items, align = "right" }: ActionMenuProps)
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
+  // Close on outside click
   useEffect(() => {
     if (!open) return;
     const onClick = (e: MouseEvent) => {
@@ -137,20 +138,42 @@ export function ActionMenu({ trigger, items, align = "right" }: ActionMenuProps)
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
 
+  // Close on Escape
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+      }
+    },
+    [],
+  );
+
   const panelAlign = align === "left" ? "left-0" : "right-0";
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative" ref={ref} onKeyDown={handleKeyDown}>
       <div
+        role="button"
+        tabIndex={0}
+        aria-haspopup="menu"
+        aria-expanded={open}
         onClick={(e) => {
           e.stopPropagation();
           setOpen((prev) => !prev);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+            setOpen((prev) => !prev);
+          }
         }}
       >
         {trigger}
       </div>
       {open && (
         <div
+          role="menu"
           className={`absolute ${panelAlign} top-8 z-50 w-32 rounded-md border border-slate-100 bg-white py-1 text-sm shadow-lg`}
           onClick={(e) => e.stopPropagation()}
         >
@@ -158,6 +181,7 @@ export function ActionMenu({ trigger, items, align = "right" }: ActionMenuProps)
             <button
               key={item.id}
               type="button"
+              role="menuitem"
               className={`block w-full px-3 py-1.5 text-left cursor-pointer ${
                 item.destructive
                   ? "text-red-600 hover:bg-red-50"
