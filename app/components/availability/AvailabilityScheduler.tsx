@@ -284,11 +284,11 @@ export function AvailabilityScheduler({ weekStart, selectedSlots, onSlotsChange 
 
         {/* Time grid body */}
         <div className="relative">
-          <div className="grid" style={{ gridTemplateColumns: GRID_COLS }}>
+          <div className="grid" role="grid" aria-label="Weekly availability schedule" style={{ gridTemplateColumns: GRID_COLS }}>
             {HOURS.map((hour, rowIdx) => {
               const period = periodForHour(hour);
               return (
-                <div key={rowIdx} className="contents">
+                <div key={rowIdx} className="contents" role="row">
                   {/* Time label */}
                   <div
                     className={`min-w-[80px] w-full flex flex-col justify-center items-center border-r border-slate-100 px- py-1.5 text-center bg-white ${rowIdx < HOURS.length - 1 ? "border-b border-b-slate-100" : ""
@@ -327,6 +327,14 @@ export function AvailabilityScheduler({ weekStart, selectedSlots, onSlotsChange 
                           handleCellDown(dayIdx, hour);
                         }}
                         onMouseEnter={() => handleCellEnter(dayIdx, hour)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleCellDown(dayIdx, hour);
+                            commitDrag();
+                          }
+                        }}
+                        tabIndex={0}
                         role="gridcell"
                         aria-label={`${DAY_LABELS[dayIdx]} ${formatHour(hour)}`}
                         aria-selected={selected}
