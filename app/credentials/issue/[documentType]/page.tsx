@@ -69,7 +69,7 @@ export default function IssueCredentialPage({ params }: PageProps) {
   if (success) {
     return (
       <div className="mx-auto w-full px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center py-16 text-center">
+        <div className="flex flex-col items-center py-16 text-center" role="status">
           <CheckCircleIcon className="h-12 w-12 text-green-600" />
           <h2 className="mt-4 text-lg font-semibold text-black">
             {label} credential issued
@@ -87,6 +87,7 @@ export default function IssueCredentialPage({ params }: PageProps) {
       <div>
         <button
           onClick={() => router.push("/credentials")}
+          aria-label="Back to Credentials"
           className="mb-4 text-sm text-slate-500 hover:text-black transition"
         >
           ← Back to Credentials
