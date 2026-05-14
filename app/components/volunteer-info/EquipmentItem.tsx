@@ -15,7 +15,7 @@ export function EquipmentItem({
   onDelete,
 }: EquipmentItemProps) {
   return (
-    <main className="w-full flex items-center gap-2.5 border-b border-slate-100 py-3 sm:py-5 last:border-0 last:pb-0 first:pt-0">
+    <div className="w-full flex items-center gap-2.5 border-b border-slate-100 py-3 sm:py-5 last:border-0 last:pb-0 first:pt-0">
       <span className="flex h-5 w-5 sm:h-10 sm:w-10 shrink-0 items-center justify-center p-1.5 sm:p-2.5 bg-lavender rounded-md text-primary">
         <EquipmentIcon className="h-5 w-5 shrink-0" />
       </span>
@@ -31,6 +31,6 @@ export function EquipmentItem({
       >
         <TrashIcon className="h-5 w-5" />
       </button>
-    </main>
+    </div>
   );
 }
