@@ -95,6 +95,7 @@ export default function IssueCredentialPage({ params }: PageProps) {
         <HeroText
           title={`Issue ${label}`}
           description={`Complete the details below to issue a ${label.toLowerCase()} credential for ${country}.`}
+          as="h2"
           titleClassName="text-xl !sm:text-2xl font-semibold !text-black leading-tight tracking-tight"
           descriptionClassName="!mt-0 !text-sm !leading-relaxed !text-slate-700"
         />
