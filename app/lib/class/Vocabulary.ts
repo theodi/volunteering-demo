@@ -1,31 +1,16 @@
 /**
  * Vocabulary constants for RDF predicates and types.
  *
- * Standard vocabularies (FOAF, PIM, SOLID, RDFS, VCARD) overlap with
- * @solid/object's internal vocabulary module, but that module is not
- * publicly exported. We keep local definitions for use in our own
- * TermWrapper subclasses. Project-specific constants (VP, GEO, SCHEMA)
- * are unique to this codebase.
+ * Standard vocabularies used by the base Agent class (FOAF, PIM, etc.) are
+ * handled internally by @solid/object and do not need to be defined here.
+ * We only define constants needed by our own extended classes and helpers.
  */
 
 // ---------------------------------------------------------------------------
-// Standard vocabularies (also used internally by @solid/object)
+// Standard vocabularies — only IRIs needed beyond @solid/object's Agent
 // ---------------------------------------------------------------------------
 
-export const FOAF = {
-  name: "http://xmlns.com/foaf/0.1/name",
-  email: "http://xmlns.com/foaf/0.1/email",
-  homepage: "http://xmlns.com/foaf/0.1/homepage",
-  knows: "http://xmlns.com/foaf/0.1/knows",
-} as const;
-
-export const PIM = {
-  storage: "http://www.w3.org/ns/pim/space#storage",
-} as const;
-
 export const SOLID = {
-  oidcIssuer: "http://www.w3.org/ns/solid/terms#oidcIssuer",
-  storage: "http://www.w3.org/ns/solid/terms#storage",
   preferredSubjectPronoun: "http://www.w3.org/ns/solid/terms#preferredSubjectPronoun",
 } as const;
 
@@ -33,16 +18,8 @@ export const RDFS = {
   label: "http://www.w3.org/2000/01/rdf-schema#label",
 } as const;
 
+/** VCARD predicates not covered by @solid/object's Agent. */
 export const VCARD = {
-  fn: "http://www.w3.org/2006/vcard/ns#fn",
-  hasEmail: "http://www.w3.org/2006/vcard/ns#hasEmail",
-  value: "http://www.w3.org/2006/vcard/ns#value",
-  hasPhoto: "http://www.w3.org/2006/vcard/ns#hasPhoto",
-  hasTelephone: "http://www.w3.org/2006/vcard/ns#hasTelephone",
-  title: "http://www.w3.org/2006/vcard/ns#title",
-  hasUrl: "http://www.w3.org/2006/vcard/ns#hasUrl",
-  organizationName: "http://www.w3.org/2006/vcard/ns#organization-name",
-  role: "http://www.w3.org/2006/vcard/ns#role",
   bday: "http://www.w3.org/2006/vcard/ns#bday",
   note: "http://www.w3.org/2006/vcard/ns#note",
   hasAddress: "http://www.w3.org/2006/vcard/ns#hasAddress",

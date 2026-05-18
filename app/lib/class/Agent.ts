@@ -1,23 +1,27 @@
+/**
+ * Extended Agent — adds project-specific properties on top of @solid/object's Agent.
+ *
+ * The base Agent from @solid/object already provides:
+ *   vcardFn, foafName, name, email, hasEmail, phone, hasTelephone,
+ *   organization, role, title, website, vcardHasUrl, foafHomepage,
+ *   photoUrl, storageUrls, pimStorage, solidStorage, oidcIssuer, knows
+ *
+ * We extend only for properties not yet in the shared library.
+ */
+
+import { Agent as BaseAgent } from "@solid/object";
 import {
   TermWrapper,
   LiteralAs,
   NamedNodeAs,
   NamedNodeFrom,
   TermAs,
-  TermFrom,
 } from "@rdfjs/wrapper";
-import { FOAF, PIM, SOLID, VCARD, SCHEMA } from "@/app/lib/class/Vocabulary";
+import { VCARD, SOLID, SCHEMA } from "@/app/lib/class/Vocabulary";
 
-/**
- * Wraps a vCard node that has vcard:value (e.g. email, telephone, url).
- * We use VCARD.value (...#value), not hasValue (...#hasValue), to match the W3C vCard ontology.
- * Renamed to actualValue because TermWrapper now exposes `value` directly.
- */
-class HasValue extends TermWrapper {
-  get actualValue(): string {
-    return this.singularNullable(VCARD.value, LiteralAs.string) ?? this.value;
-  }
-}
+// ---------------------------------------------------------------------------
+// Helper wrappers for structured vCard nodes
+// ---------------------------------------------------------------------------
 
 class Address extends TermWrapper {
   get region(): string | null {
@@ -32,103 +36,11 @@ class Address extends TermWrapper {
   }
 }
 
-export class Agent extends TermWrapper {
-  get vcardFn(): string | undefined {
-    return this.singularNullable(VCARD.fn, LiteralAs.string);
-  }
+// ---------------------------------------------------------------------------
+// Extended Agent
+// ---------------------------------------------------------------------------
 
-  get vcardHasUrl(): string | undefined {
-    return this.singularNullable(VCARD.hasUrl, NamedNodeAs.string);
-  }
-
-  get organization(): string | null {
-    return (
-      this.singularNullable(VCARD.organizationName, LiteralAs.string) ??
-      null
-    );
-  }
-
-  get role(): string | null {
-    return (
-      this.singularNullable(VCARD.role, LiteralAs.string) ?? null
-    );
-  }
-
-  get title(): string | null {
-    return this.singularNullable(VCARD.title, LiteralAs.string) ?? null;
-  }
-
-  get phone(): string | null {
-    const first = this.hasTelephone?.actualValue ?? null;
-    if (first != null) return first;
-    const all = this.telephones;
-    if (all.size === 0) return null;
-    return [...all][0]?.actualValue ?? null;
-  }
-
-  /** All telephone nodes (use .actualValue on each for the number). */
-  get telephones(): Set<HasValue> {
-    return this.objects(VCARD.hasTelephone, TermAs.instance(HasValue), TermFrom.instance);
-  }
-
-  get hasTelephone(): HasValue | undefined {
-    return this.singularNullable(VCARD.hasTelephone, TermAs.instance(HasValue));
-  }
-
-  get foafName(): string | undefined {
-    return this.singularNullable(FOAF.name, LiteralAs.string);
-  }
-
-  get name(): string | null {
-    return (
-      this.vcardFn ??
-      this.foafName ??
-      this.value.split("/").pop()?.split("#")[0] ??
-      null
-    );
-  }
-
-  get storageUrls(): Set<string> {
-    return new Set([...this.pimStorage, ...this.solidStorage]);
-  }
-
-  get foafHomepage(): string | undefined {
-    return this.singularNullable(FOAF.homepage, NamedNodeAs.string);
-  }
-
-  /** vcard:url can point to a node with vcard:value (e.g. WebID URL). */
-  get hasUrlValue(): HasValue | undefined {
-    return this.singularNullable(VCARD.hasUrl, TermAs.instance(HasValue));
-  }
-
-  get website(): string | null {
-    return this.hasUrlValue?.actualValue ?? this.vcardHasUrl ?? this.foafHomepage ?? null;
-  }
-
-  get photoUrl(): string | null {
-    return this.singularNullable(VCARD.hasPhoto, LiteralAs.string) ?? null;
-  }
-
-  get pimStorage(): Set<string> {
-    return this.objects(PIM.storage, NamedNodeAs.string, NamedNodeFrom.string);
-  }
-
-  get solidStorage(): Set<string> {
-    return this.objects(SOLID.storage, NamedNodeAs.string, NamedNodeFrom.string);
-  }
-
-  get email(): string | null {
-    return this.hasEmail?.actualValue ?? null;
-  }
-
-  get hasEmail(): HasValue | undefined {
-    return this.singularNullable(VCARD.hasEmail, TermAs.instance(HasValue));
-  }
-
-  get knows(): Set<string> {
-    return this.objects(FOAF.knows, NamedNodeAs.string, NamedNodeFrom.string);
-  }
-
+export class Agent extends BaseAgent {
   get bday(): string | null {
     return this.singularNullable(VCARD.bday, LiteralAs.string) ?? null;
   }
@@ -143,7 +55,7 @@ export class Agent extends TermWrapper {
 
   get location(): string | null {
     const addr = this.hasAddress?.formatted;
-    return (addr != null && addr !== "") ? addr : null;
+    return addr != null && addr !== "" ? addr : null;
   }
 
   get preferredSubjectPronoun(): string | null {
