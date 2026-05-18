@@ -25,6 +25,12 @@ export const VCARD = {
   hasAddress: "http://www.w3.org/2006/vcard/ns#hasAddress",
   region: "http://www.w3.org/2006/vcard/ns#region",
   countryName: "http://www.w3.org/2006/vcard/ns#country-name",
+  hasEmail: "http://www.w3.org/2006/vcard/ns#hasEmail",
+  hasTelephone: "http://www.w3.org/2006/vcard/ns#hasTelephone",
+  value: "http://www.w3.org/2006/vcard/ns#value",
+  // The library uses hasValue internally but doesn't export it yet.
+  // TODO: Remove this once @solid/object exports VCARD from its public API.
+  hasValue: "http://www.w3.org/2006/vcard/ns#hasValue",
 } as const;
 
 // ---------------------------------------------------------------------------

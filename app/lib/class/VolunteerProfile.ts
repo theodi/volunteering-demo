@@ -132,54 +132,30 @@ export class CredentialNode extends TermWrapper {
  */
 export class VolunteerProfile extends TermWrapper {
   get skills(): Set<string> {
-    return this.objects(
-      VP.hasSkill,
-      NamedNodeAs.string,
-      NamedNodeFrom.string,
-    );
+    return this.objects(VP.hasSkill, NamedNodeAs.string, NamedNodeFrom.string);
   }
 
   get causes(): Set<string> {
-    return this.objects(
-      VP.preferredCause,
-      NamedNodeAs.string,
-      NamedNodeFrom.string,
-    );
+    return this.objects(VP.preferredCause, NamedNodeAs.string, NamedNodeFrom.string);
   }
 
   get equipment(): Set<string> {
-    return this.objects(
-      VP.hasRequirement,
-      NamedNodeAs.string,
-      NamedNodeFrom.string,
-    );
+    return this.objects(VP.hasRequirement, NamedNodeAs.string, NamedNodeFrom.string);
   }
 
   /** Read-only: preferred location nodes. Use writeLocationsToPod for mutations. */
   get locationNodes(): Set<PreferredLocationNode> {
-    return this.objects(
-      VP.preferredLocation,
-      TermAs.instance(PreferredLocationNode),
-      TermFrom.instance,
-    );
+    return this.objects(VP.preferredLocation, TermAs.instance(PreferredLocationNode), TermFrom.instance);
   }
 
   /** Preferred time IRIs (e.g. volunteering:MondayMorning). */
   get preferredTimes(): Set<string> {
-    return this.objects(
-      VP.preferredTime,
-      NamedNodeAs.string,
-      NamedNodeFrom.string,
-    );
+    return this.objects(VP.preferredTime, NamedNodeAs.string, NamedNodeFrom.string);
   }
 
   /** Credential nodes (hash URIs, e.g. <#cred-1234567890>). */
   get credentials(): Set<CredentialNode> {
-    return this.objects(
-      VP.hasCredential,
-      TermAs.instance(CredentialNode),
-      TermFrom.instance,
-    );
+    return this.objects(VP.hasCredential, TermAs.instance(CredentialNode), TermFrom.instance);
   }
 }
 

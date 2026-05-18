@@ -29,6 +29,11 @@ export function useAgent(): UseAgentResult {
     queryFn: () => fetchAndParseProfile(webId!, fetchFn),
     enabled: !!webId,
     gcTime: Number.POSITIVE_INFINITY,
+    // The Agent object uses lazy getters that read from an RDF store on access.
+    // React Query normally tries to compare old vs new data by walking every property,
+    // which would accidentally call those getters and cause errors. Turning this off
+    // tells React Query to just use the new Agent as-is without comparing it.
+    structuralSharing: false,
   });
 
   useEffect(() => {
