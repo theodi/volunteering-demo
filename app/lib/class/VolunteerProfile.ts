@@ -189,6 +189,8 @@ export function wrapVolunteerProfile(
   dataset: DatasetCore,
   factory: DataFactory,
 ): VolunteerProfile {
-  const subject = factory.namedNode(subjectIri);
-  return new VolunteerProfile(subject, dataset, factory);
+  
+  // const subject = factory.namedNode(subjectIri);
+  // TODO: replace anywhere we use wrapVolunteerProfile with VolunteerProfile as the wrapVolunteerProfile is now redundant
+  return new VolunteerProfile(subjectIri, dataset, factory);
 }
