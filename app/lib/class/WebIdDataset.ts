@@ -10,5 +10,5 @@ export class WebIdDataset extends DatasetWrapper {
     return undefined;
   }
 }
-// We dont need this.
+// We dont need this file.
 // this is basically all thats needed - new Agent(webId, DataFactory)
