@@ -62,9 +62,9 @@ export function AddCustomEquipmentModal({
   if (!isOpen) return null;
 
   return (
-    <ModalWrapper isOpen={isOpen} onClose={handleClose} className="max-w-xl! w-full border-none! rounded-sm!">
+    <ModalWrapper isOpen={isOpen} onClose={handleClose} className="max-w-xl! w-full border-none! rounded-sm!" ariaLabelledBy="custom-equipment-title">
       <section className="w-full flex flex-col min-h-[45vh] max-h-[45vh]">
-        <ModalHeader title="Add Custom Equipment" onClose={handleClose} />
+        <ModalHeader title="Add Custom Equipment" onClose={handleClose} titleId="custom-equipment-title" />
 
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4 px-5 py-5">
           {/* Equipment Name */}

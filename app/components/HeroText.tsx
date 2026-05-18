@@ -5,6 +5,8 @@ export interface HeroTextProps {
   title: string;
   /** Supporting paragraph */
   description: string;
+  /** HTML heading level to render (default "h1") */
+  as?: "h1" | "h2" | "h3" | "h4";
   /** Optional substring of title to highlight with a different color */
   highlightedText?: string;
   /** Color for the highlighted segment (e.g. "#2563eb") */
@@ -25,6 +27,7 @@ const defaultDescriptionClasses =
 export function HeroText({
   title,
   description,
+  as: Heading = "h1",
   highlightedText,
   highlightedColor = "#1D70B8",
   defaultTitleColor = "#003078",
@@ -52,11 +55,11 @@ export function HeroText({
 
   return (
     <div className="flex flex-col justify-center">
-      <h1
+      <Heading
         className={`${defaultTitleClasses} ${titleClassName}`.trim()}
       >
         {renderTitle()}
-      </h1>
+      </Heading>
       <p
         className={`${defaultDescriptionClasses} ${descriptionClassName}`.trim()}
       >

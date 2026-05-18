@@ -51,8 +51,6 @@ export function Nav() {
           <button
             type="button"
             className="flex items-center gap-1 rounded-full p-1 text-white transition-colors bg-bold-grey focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-cosmos sm:gap-2 sm:pr-2"
-            aria-expanded={false}
-            aria-haspopup="true"
             aria-label="User menu"
           >
             <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-white sm:h-9 sm:w-9">

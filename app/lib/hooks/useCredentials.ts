@@ -8,6 +8,7 @@ import {
   readCredentialsFromPod,
   writeCredentialToPod,
   updateCredentialStatusInPod,
+  removeCredentialFromPod,
 } from "@/app/lib/helpers/volunteerProfileSkills";
 import type { PodCredential, CredentialStatus } from "@/app/lib/helpers/volunteerProfileSkills";
 
@@ -24,6 +25,8 @@ export type UseCredentialsResult = {
   addCredential: (credential: PodCredential) => Promise<void>;
   /** Updates the status of an existing credential in the Pod. */
   updateStatus: (credentialId: string, status: CredentialStatus) => Promise<void>;
+  /** Removes a credential from the Pod. */
+  removeCredential: (credentialId: string) => Promise<void>;
   /** Force re-fetch credentials from the Pod. */
   refetch: () => Promise<void>;
 };
@@ -114,12 +117,40 @@ export function useCredentials(): UseCredentialsResult {
     [webId, podRoot, fetchFn, queryClient],
   );
 
+  // -------------------------------------------------------------------------
+  // Remove a credential (optimistic cache update + Pod delete)
+  // -------------------------------------------------------------------------
+  const removeCredential = useCallback(
+    async (credentialId: string) => {
+      if (!webId || !podRoot) {
+        throw new Error("You must be logged in to remove credentials");
+      }
+
+      const previous = queryClient.getQueryData<PodCredential[]>([QUERY_KEY, webId]);
+
+      // Optimistic update
+      queryClient.setQueryData<PodCredential[]>(
+        [QUERY_KEY, webId],
+        (prev = []) => prev.filter((c) => c.id !== credentialId),
+      );
+
+      try {
+        await removeCredentialFromPod(fetchFn, podRoot, credentialId);
+      } catch (err) {
+        if (previous) queryClient.setQueryData([QUERY_KEY, webId], previous);
+        throw err;
+      }
+    },
+    [webId, podRoot, fetchFn, queryClient],
+  );
+
   return {
     credentials,
     isLoading: podLoading || queryLoading,
     error: readError instanceof Error ? readError : null,
     addCredential,
     updateStatus,
+    removeCredential,
     refetch: async () => {
       await refetch();
     },

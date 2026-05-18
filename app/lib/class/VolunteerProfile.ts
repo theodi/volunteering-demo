@@ -1,6 +1,7 @@
 import {
   TermWrapper,
   LiteralAs,
+  LiteralFrom,
   NamedNodeAs,
   NamedNodeFrom,
   TermAs,
@@ -40,6 +41,88 @@ export class PreferredLocationNode extends TermWrapper {
 
   get label(): string | null {
     return this.singularNullable(RDFS.label, LiteralAs.string) ?? null;
+  }
+}
+
+/**
+ * Wraps a vp:Credential named node (hash URI, e.g. <#cred-1234567890>).
+ * Each property maps directly to a VP predicate, with getters and setters
+ * backed by the underlying RDF dataset.
+ */
+export class CredentialNode extends TermWrapper {
+  get title(): string | undefined {
+    return this.singularNullable(VP.credentialTitle, LiteralAs.string);
+  }
+  set title(value: string | undefined) {
+    this.overwriteNullable(VP.credentialTitle, value, LiteralFrom.string);
+  }
+
+  /** The requirement IRI, e.g. "https://id.volunteeringdata.io/document/DRIVING_LICENCE" */
+  get credentialType(): string | undefined {
+    return this.singularNullable(VP.credentialType, NamedNodeAs.string);
+  }
+  set credentialType(value: string | undefined) {
+    this.overwriteNullable(VP.credentialType, value, NamedNodeFrom.string);
+  }
+
+  /** The issuer IRI */
+  get credentialIssuer(): string | undefined {
+    return this.singularNullable(VP.credentialIssuer, NamedNodeAs.string);
+  }
+  set credentialIssuer(value: string | undefined) {
+    this.overwriteNullable(VP.credentialIssuer, value, NamedNodeFrom.string);
+  }
+
+  /** Issuer display label (rdfs:label) */
+  get issuerLabel(): string | undefined {
+    return this.singularNullable(RDFS.label, LiteralAs.string);
+  }
+  set issuerLabel(value: string | undefined) {
+    this.overwriteNullable(RDFS.label, value, LiteralFrom.string);
+  }
+
+  get status(): string | undefined {
+    return this.singularNullable(VP.credentialStatus, LiteralAs.string);
+  }
+  set status(value: string | undefined) {
+    this.overwriteNullable(VP.credentialStatus, value, LiteralFrom.string);
+  }
+
+  get issuedAt(): string | undefined {
+    return this.singularNullable(VP.credentialIssuedAt, LiteralAs.string);
+  }
+  set issuedAt(value: string | undefined) {
+    this.overwriteNullable(VP.credentialIssuedAt, value, LiteralFrom.string);
+  }
+
+  // --- Optional document credential fields ---
+
+  get documentType(): string | undefined {
+    return this.singularNullable(VP.documentType, LiteralAs.string);
+  }
+  set documentType(value: string | undefined) {
+    this.overwriteNullable(VP.documentType, value, LiteralFrom.string);
+  }
+
+  get issuingCountry(): string | undefined {
+    return this.singularNullable(VP.issuingCountry, LiteralAs.string);
+  }
+  set issuingCountry(value: string | undefined) {
+    this.overwriteNullable(VP.issuingCountry, value, LiteralFrom.string);
+  }
+
+  get expiryDate(): string | undefined {
+    return this.singularNullable(VP.expiryDate, LiteralAs.string);
+  }
+  set expiryDate(value: string | undefined) {
+    this.overwriteNullable(VP.expiryDate, value, LiteralFrom.string);
+  }
+
+  get documentNumber(): string | undefined {
+    return this.singularNullable(VP.documentNumber, LiteralAs.string);
+  }
+  set documentNumber(value: string | undefined) {
+    this.overwriteNullable(VP.documentNumber, value, LiteralFrom.string);
   }
 }
 
@@ -90,6 +173,15 @@ export class VolunteerProfile extends TermWrapper {
       NamedNodeFrom.string,
     );
   }
+
+  /** Credential nodes (hash URIs, e.g. <#cred-1234567890>). */
+  get credentials(): Set<CredentialNode> {
+    return this.objects(
+      VP.hasCredential,
+      TermAs.instance(CredentialNode),
+      TermFrom.instance,
+    );
+  }
 }
 
 export function wrapVolunteerProfile(
@@ -97,6 +189,8 @@ export function wrapVolunteerProfile(
   dataset: DatasetCore,
   factory: DataFactory,
 ): VolunteerProfile {
-  const subject = factory.namedNode(subjectIri);
-  return new VolunteerProfile(subject, dataset, factory);
+  
+  // const subject = factory.namedNode(subjectIri);
+  // TODO: replace anywhere we use wrapVolunteerProfile with VolunteerProfile as the wrapVolunteerProfile is now redundant
+  return new VolunteerProfile(subjectIri, dataset, factory);
 }

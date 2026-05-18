@@ -9,14 +9,14 @@ import type { Agent } from "@/app/lib/class/Agent";
  * Pure async — caching and dedup are handled by React Query (useAgent hook).
  */
 export async function fetchAndParseProfile(
-  webId: string,
+  webId: string, 
   fetchFn: typeof fetch = fetch,
 ): Promise<Agent | null> {
-  const docUrl = webId.split("#")[0];
+  const docUrl = webId.split("#")[0]; // redundant
 
   let content: string;
   try {
-    const res = await fetchFn(docUrl, {
+    const res = await fetchFn(docUrl, { // we can just directly pass the webid url here
       method: "GET",
       headers: { Accept: "text/turtle, application/turtle, text/n3, application/n3" },
     });
@@ -34,4 +34,8 @@ export async function fetchAndParseProfile(
   }
 
   return new WebIdDataset(store, DataFactory).mainSubject ?? null;
+  // TODOs:
+  // WebIdDataset - we dont need this, rather we can have the webid gotten from the Agent class(from the object library so we dont need this funtion)
+  // if the Agent has no webid allow the app throw an error, as the webid is required for the app to work.
+  // this is basically all thats needed - new Agent(webId, DataFactory)
 }
