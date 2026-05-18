@@ -76,7 +76,7 @@ export class Agent extends TermWrapper {
   }
 
   get foafName(): string | undefined {
-    return this.singularNullable(FOAF.fname, LiteralAs.string);
+    return this.singularNullable(FOAF.name, LiteralAs.string);
   }
 
   get name(): string | null {
