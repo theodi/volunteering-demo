@@ -1,23 +1,43 @@
-/** RDF vocabulary IRIs used for WebID profile (Agent) parsing. */
+/**
+ * Vocabulary constants for RDF predicates and types.
+ *
+ * Standard vocabularies used by the base Agent class (FOAF, PIM, etc.) are
+ * handled internally by @solid/object and do not need to be defined here.
+ * We only define constants needed by our own extended classes and helpers.
+ */
 
-export const FOAF = {
-  fname: "http://xmlns.com/foaf/0.1/name",
-  email: "http://xmlns.com/foaf/0.1/email",
-  homepage: "http://xmlns.com/foaf/0.1/homepage",
-  knows: "http://xmlns.com/foaf/0.1/knows",
-} as const;
-
-export const PIM = {
-  storage: "http://www.w3.org/ns/pim/space#storage",
-} as const;
+// ---------------------------------------------------------------------------
+// Standard vocabularies — only IRIs needed beyond @solid/object's Agent
+// ---------------------------------------------------------------------------
 
 export const SOLID = {
-  oidcIssuer: "http://www.w3.org/ns/solid/terms#oidcIssuer",
-  storage: "http://www.w3.org/ns/solid/terms#storage",
   preferredSubjectPronoun: "http://www.w3.org/ns/solid/terms#preferredSubjectPronoun",
 } as const;
 
-/** schema.org - sameAs often used for social profile URLs */
+export const RDFS = {
+  label: "http://www.w3.org/2000/01/rdf-schema#label",
+} as const;
+
+/** VCARD predicates not covered by @solid/object's Agent. */
+export const VCARD = {
+  bday: "http://www.w3.org/2006/vcard/ns#bday",
+  note: "http://www.w3.org/2006/vcard/ns#note",
+  hasAddress: "http://www.w3.org/2006/vcard/ns#hasAddress",
+  region: "http://www.w3.org/2006/vcard/ns#region",
+  countryName: "http://www.w3.org/2006/vcard/ns#country-name",
+  hasEmail: "http://www.w3.org/2006/vcard/ns#hasEmail",
+  hasTelephone: "http://www.w3.org/2006/vcard/ns#hasTelephone",
+  value: "http://www.w3.org/2006/vcard/ns#value",
+  // The library uses hasValue internally but doesn't export it yet.
+  // TODO: Remove this once @solid/object exports VCARD from its public API.
+  hasValue: "http://www.w3.org/2006/vcard/ns#hasValue",
+} as const;
+
+// ---------------------------------------------------------------------------
+// Project-specific vocabularies
+// ---------------------------------------------------------------------------
+
+/** schema.org — sameAs often used for social profile URLs. */
 export const SCHEMA = {
   sameAs: "https://schema.org/sameAs",
 } as const;
@@ -51,26 +71,4 @@ export const VOLUNTEERING_NS = "https://ns.volunteeringdata.io/" as const;
 export const GEO = {
   lat: "http://www.w3.org/2003/01/geo/wgs84_pos#lat",
   long: "http://www.w3.org/2003/01/geo/wgs84_pos#long",
-} as const;
-
-export const RDFS = {
-  label: "http://www.w3.org/2000/01/rdf-schema#label",
-} as const;
-
-export const VCARD = {
-  fn: "http://www.w3.org/2006/vcard/ns#fn",
-  hasEmail: "http://www.w3.org/2006/vcard/ns#hasEmail",
-  /** Standard predicate for the value of an email/telephone/url node (W3C vCard ...#value). */
-  value: "http://www.w3.org/2006/vcard/ns#value",
-  hasPhoto: "http://www.w3.org/2006/vcard/ns#hasPhoto",
-  hasTelephone: "http://www.w3.org/2006/vcard/ns#hasTelephone",
-  title: "http://www.w3.org/2006/vcard/ns#title",
-  hasUrl: "http://www.w3.org/2006/vcard/ns#hasUrl",
-  organizationName: "http://www.w3.org/2006/vcard/ns#organization-name",
-  role: "http://www.w3.org/2006/vcard/ns#role",
-  bday: "http://www.w3.org/2006/vcard/ns#bday",
-  note: "http://www.w3.org/2006/vcard/ns#note",
-  hasAddress: "http://www.w3.org/2006/vcard/ns#hasAddress",
-  region: "http://www.w3.org/2006/vcard/ns#region",
-  countryName: "http://www.w3.org/2006/vcard/ns#country-name",
 } as const;
