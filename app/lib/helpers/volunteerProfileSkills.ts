@@ -11,7 +11,7 @@
 
 import { Parser, Writer, Store, DataFactory } from "n3";
 import type { BlankNode } from "n3";
-import { wrapVolunteerProfile } from "@/app/lib/class/VolunteerProfile";
+import { VolunteerProfile } from "@/app/lib/class/VolunteerProfile";
 import { VP, GEO, RDFS, VOLUNTEERING_NS } from "@/app/lib/class/Vocabulary";
 import type { SavedLocation } from "@/app/components/volunteer-info/PreferredLocations";
 
@@ -90,7 +90,7 @@ async function readPropertyFromPod(
   const store = parseTurtle(text, docUrl);
   if (!store) return [];
 
-  const profile = wrapVolunteerProfile(subjectIri, store, DataFactory);
+  const profile = new VolunteerProfile(DataFactory.namedNode(subjectIri), store, DataFactory);
   return [...profile[property]];
 }
 
@@ -121,7 +121,7 @@ async function writePropertyToPod(
     store.addQuad(subjectNode, DataFactory.namedNode(RDF_TYPE), DataFactory.namedNode(VP.VolunteerProfile));
   }
 
-  const profile = wrapVolunteerProfile(subjectIri, store, DataFactory);
+  const profile = new VolunteerProfile(DataFactory.namedNode(subjectIri), store, DataFactory);
   const set: Set<string> = profile[property];
   set.clear();
   for (const uri of uris) {
@@ -209,7 +209,7 @@ export async function readLocationsFromPod(
   const store = parseTurtle(text, docUrl);
   if (!store) return [];
 
-  const profile = wrapVolunteerProfile(subjectIri, store, DataFactory);
+  const profile = new VolunteerProfile(DataFactory.namedNode(subjectIri), store, DataFactory);
   const locations: SavedLocation[] = [];
   for (const locNode of profile.locationNodes) {
     const pt = locNode.point;

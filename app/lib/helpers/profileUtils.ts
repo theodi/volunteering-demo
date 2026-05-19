@@ -1,37 +1,29 @@
 import { Parser, Store, DataFactory } from "n3";
-import { WebIdDataset } from "@/app/lib/class/WebIdDataset";
-import type { Agent } from "@/app/lib/class/Agent";
+import { Agent } from "@/app/lib/class/Agent";
 
 /**
  * Fetches the WebID profile document, parses it as Turtle, and returns the
- * main Agent via @rdfjs/wrapper. Returns null if the fetch or parse fails.
+ * Agent wrapping that WebID subject.
  *
- * Pure async — caching and dedup are handled by React Query (useAgent hook).
+ * Throws if the fetch or parse fails — the WebID is required for the app.
+ * Caching and dedup are handled by React Query (useAgent hook).
  */
 export async function fetchAndParseProfile(
   webId: string,
   fetchFn: typeof fetch = fetch,
-): Promise<Agent | null> {
-  const docUrl = webId.split("#")[0];
+): Promise<Agent> {
+  const res = await fetchFn(webId, {
+    method: "GET",
+    headers: { Accept: "text/turtle, application/turtle, text/n3, application/n3" },
+  });
 
-  let content: string;
-  try {
-    const res = await fetchFn(docUrl, {
-      method: "GET",
-      headers: { Accept: "text/turtle, application/turtle, text/n3, application/n3" },
-    });
-    if (!res.ok) return null;
-    content = await res.text();
-  } catch {
-    return null;
+  if (!res.ok) {
+    throw new Error(`Failed to fetch WebID profile: ${res.status}`);
   }
 
+  const content = await res.text();
   const store = new Store();
-  try {
-    store.addQuads(new Parser({ baseIRI: docUrl }).parse(content));
-  } catch {
-    return null;
-  }
+  store.addQuads(new Parser({ baseIRI: webId }).parse(content));
 
-  return new WebIdDataset(store, DataFactory).mainSubject ?? null;
+  return new Agent(DataFactory.namedNode(webId), store, DataFactory);
 }

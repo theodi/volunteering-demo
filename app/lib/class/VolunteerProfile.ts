@@ -6,7 +6,6 @@ import {
   TermAs,
   TermFrom,
 } from "@rdfjs/wrapper";
-import type { DatasetCore, DataFactory } from "@rdfjs/types";
 import { VP, GEO, RDFS } from "@/app/lib/class/Vocabulary";
 
 /**
@@ -90,13 +89,4 @@ export class VolunteerProfile extends TermWrapper {
       NamedNodeFrom.string,
     );
   }
-}
-
-export function wrapVolunteerProfile(
-  subjectIri: string,
-  dataset: DatasetCore,
-  factory: DataFactory,
-): VolunteerProfile {
-  const subject = factory.namedNode(subjectIri);
-  return new VolunteerProfile(subject, dataset, factory);
 }
